@@ -1,0 +1,64 @@
+import type { StaffMember } from "@/lib/types";
+
+/**
+ * Zespół Glow Studio. Zdjęcia: placeholdery w /public/team (palette-matched).
+ * Przy realnej sesji — podmiana na statyczny import dla blurDataURL.
+ */
+export const team: StaffMember[] = [
+  {
+    id: "maja",
+    slug: "maja-kowalczyk",
+    name: "Maja Kowalczyk",
+    role: "Art Director · Senior Colorist",
+    specialties: ["Balayage", "Korekta koloru", "Strzyżenie autorskie"],
+    bio: "Założycielka studia. 14 lat przy fotelu, edukatorka koloryzacji. Specjalizuje się w naturalnych, wtopionych przejściach i metamorfozach koloru.",
+    photo: "/team/maja.jpg",
+    rating: 5.0,
+    reviewCount: 214,
+    instagram: "https://instagram.com/maja.glowstudio",
+    categoryIds: ["cat-color", "cat-cut", "cat-style"],
+    order: 1,
+  },
+  {
+    id: "kris",
+    slug: "krzysztof-nowak",
+    name: "Krzysztof Nowak",
+    role: "Master Barber & Stylista",
+    specialties: ["Strzyżenie męskie", "Strzyżenie damskie", "Brzytwa"],
+    bio: "Precyzja i klasyczne rzemiosło barberskie połączone z nowoczesnym strzyżeniem. Wierzy, że dobra fryzura zaczyna się od dobrej konsultacji.",
+    photo: "/team/kris.jpg",
+    rating: 4.9,
+    reviewCount: 168,
+    instagram: "https://instagram.com/kris.glowstudio",
+    categoryIds: ["cat-cut"],
+    order: 2,
+  },
+  {
+    id: "natalia",
+    slug: "natalia-wisniewska",
+    name: "Natalia Wiśniewska",
+    role: "Stylistka & Kolorystka",
+    specialties: ["Koloryzacja", "Stylizacje okazjonalne", "Fale"],
+    bio: "Łączy koloryzację ze stylizacją okazjonalną. Uwielbia projekty ślubne i delikatne rozświetlenia twarzy.",
+    photo: "/team/natalia.jpg",
+    rating: 4.9,
+    reviewCount: 142,
+    instagram: "https://instagram.com/natalia.glowstudio",
+    categoryIds: ["cat-color", "cat-cut", "cat-style"],
+    order: 3,
+  },
+  {
+    id: "ola",
+    slug: "aleksandra-dabrowska",
+    name: "Aleksandra Dąbrowska",
+    role: "Specjalistka pielęgnacji",
+    specialties: ["Keratyna", "Nanoplastia", "Regeneracja"],
+    bio: "Trycholożka z pasją do zdrowego włosa. Dobiera zabiegi regenerujące, które realnie odbudowują strukturę po koloryzacji.",
+    photo: "/team/ola.jpg",
+    rating: 5.0,
+    reviewCount: 97,
+    instagram: "https://instagram.com/ola.glowstudio",
+    categoryIds: ["cat-care"],
+    order: 4,
+  },
+];

@@ -1,26 +1,209 @@
 @import "tailwindcss";
 
+/* ============================================================
+   GLOW STUDIO — Design system "Quiet Atelier"
+   Quiet luxury / editorial. Kremowa baza, kontrastowy serif,
+   jeden terakotowy akcent, jeden spójny "język ruchu".
+   ============================================================ */
+
+@theme {
+  /* — Paleta — */
+  --color-cream: #faf7f2; /* Cloud Dancer — tło ~85% */
+  --color-ink: #1a1714; /* espresso — tekst, nagłówki */
+  --color-ink-soft: #4a4239; /* przygaszony tekst */
+  --color-muted: #6f665b; /* tekst drugorzędny / eyebrow */
+  --color-champagne: #c9a87c; /* ciepłe złoto — hairline, akcent premium */
+  --color-champagne-soft: #e9dcc4;
+  --color-sage: #8a9a82; /* drugi akcent — organiczne plamy */
+  --color-sand: #e8dfd3; /* karty, sekcje przedzielające */
+  --color-line: #e7ddcf; /* hairline / obramowania */
+  --color-terracotta: #b6755f; /* JEDYNY mocny akcent — CTA */
+  --color-terracotta-deep: #9c5f4b;
+
+  /* — Semantyka — */
+  --color-background: var(--color-cream);
+  --color-foreground: var(--color-ink);
+
+  /* — Typografia — */
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+
+  /* Fluidowe skale display (clamp = bez breakpointów) */
+  --text-hero: clamp(3.25rem, 11vw, 9rem);
+  --text-hero--line-height: 0.9;
+  --text-hero--letter-spacing: -0.02em;
+  --text-display: clamp(2.5rem, 6vw, 5rem);
+  --text-display--line-height: 1;
+  --text-display--letter-spacing: -0.015em;
+  --text-title: clamp(1.75rem, 3vw, 2.75rem);
+  --text-title--line-height: 1.1;
+  --text-eyebrow: 0.75rem;
+  --text-eyebrow--line-height: 1;
+  --text-eyebrow--letter-spacing: 0.18em;
+
+  /* — Ruch — jeden easing, trzy czasy (jedwabisty gest marki) — */
+  --ease-silk: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* — Promienie — */
+  --radius-card: 1.5rem;
+  --radius-pill: 999px;
+}
+
+/* Czasy ruchu jako zwykłe zmienne (używane w transition/animation) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --dur-1: 240ms;
+  --dur-2: 420ms;
+  --dur-3: 680ms;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+    /* offset kotwic pod sticky navbarem (h-20 = 5rem + oddech) */
+    scroll-padding-top: 5.5rem;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    line-height: 1.7;
+    font-synthesis-weight: none;
+  }
+
+  ::selection {
+    background: var(--color-champagne);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-terracotta);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Globalne poszanowanie preferencji ruchu */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ============================================================
+   Utilities / komponenty wspólne
+   ============================================================ */
+
+/* Szkło — sticky navbar, panele */
+.glass {
+  background: color-mix(in oklab, var(--color-cream) 72%, transparent);
+  backdrop-filter: blur(16px) saturate(1.25);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25);
+}
+
+/* Subtelny film grain — fakturuje płaską biel (premium touch) */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Kinetyczna typografia variable Fraunces (sterowane na scroll w Etapie 2) */
+.font-feature-display {
+  font-feature-settings: "ss01", "liga", "dlig";
+}
+
+/* ------------------------------------------------------------
+   "Blur-to-sharp reveal" — sygnaturowy gest.
+   1) Natywny CSS scroll-driven (wątek kompozytora, 60fps).
+   2) Fallback IntersectionObserver (klasy dodaje Reveal.tsx),
+      gdy brak scroll-timeline (np. Firefox bez flagi).
+   Treść domyślnie WIDOCZNA → progressive enhancement (działa bez JS).
+   ------------------------------------------------------------ */
+/* Treść jest domyślnie WIDOCZNA (bez JS, przy prefers-reduced-motion, oraz
+   gdy element jest już w kadrze przy załadowaniu). Reveal.tsx dodaje .reveal--js
+   tylko elementom poniżej foldu, a IntersectionObserver dokłada .reveal--in,
+   gdy wejdą w widok. Dzięki temu nic nie może „utknąć” niewidoczne. */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal--js {
+    opacity: 0;
+    filter: blur(12px);
+    transform: translateY(28px);
+    will-change: opacity, transform, filter;
+  }
+  .reveal--js.reveal--in {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+    transition:
+      opacity var(--dur-3) var(--ease-silk),
+      filter var(--dur-3) var(--ease-silk),
+      transform var(--dur-3) var(--ease-silk);
+  }
+}
+
+/* ------------------------------------------------------------
+   Suwak przed/po (BeforeAfter) — niewidoczny, pełnowymiarowy
+   <input type=range> obsługuje mysz, dotyk i klawiaturę; widoczny
+   uchwyt i przycięcie rysujemy osobno (sterowane stanem React).
+   ------------------------------------------------------------ */
+.ba-range {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: ew-resize;
+  margin: 0;
+  border-radius: var(--radius-card);
+}
+.ba-range:focus-visible {
+  outline: 2px solid var(--color-terracotta);
+  outline-offset: -2px;
+}
+.ba-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 2.75rem;
+  height: 100vh; /* przykryj całą wysokość kadru → łatwy chwyt */
+  background: transparent;
+  cursor: ew-resize;
+}
+.ba-range::-moz-range-thumb {
+  width: 2.75rem;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  cursor: ew-resize;
+}
+.ba-range::-moz-range-track {
+  background: transparent;
+}
+
+/* Delikatny Ken Burns na posterze hero — tylko gdy ruch dozwolony. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes kenburns {
+    from {
+      transform: scale(1) translateZ(0);
+    }
+    to {
+      transform: scale(1.08) translateZ(0);
+    }
+  }
+  .kenburns {
+    animation: kenburns 22s var(--ease-out-soft) infinite alternate;
+  }
 }
