@@ -17,7 +17,7 @@ export function Manifesto() {
           <p className="mt-8 font-display text-[clamp(2.1rem,4.6vw,4.1rem)] leading-[1.1] font-light tracking-[-0.01em] text-ink">
             Wierzymy, że piękno rodzi się ze{" "}
             <em className="text-terracotta">spokoju</em>: bez pośpiechu, bez
-            kompromisów, z pełną uwagą poświęconą Tobie.
+            kompromisów, z&nbsp;pełną uwagą poświęconą Tobie.
           </p>
           <p className="mt-8 max-w-lg text-ink-soft">
             Każda wizyta zaczyna się od rozmowy i kawy, a kończy efektem, z którym
@@ -26,7 +26,7 @@ export function Manifesto() {
           </p>
         </Reveal>
 
-        <Reveal delay={120} className="mx-auto w-full max-w-md lg:col-span-5 lg:-mr-20 lg:max-w-none">
+        <Reveal delay={120} className="mx-auto w-full max-w-sm lg:col-span-5 lg:-mr-20 lg:max-w-none">
           <Image
             src={ART}
             alt=""

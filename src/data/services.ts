@@ -1,4 +1,5 @@
 import type { Service, ServiceCategory } from "@/lib/types";
+import { sierotki } from "@/lib/format";
 
 /**
  * Cennik Glow Studio: realne widełki dla salonu premium w Warszawie.
@@ -6,7 +7,7 @@ import type { Service, ServiceCategory } from "@/lib/types";
  * Czasy trwania zasilają kreator rezerwacji i siatkę slotów.
  */
 
-export const serviceCategories: ServiceCategory[] = [
+const categoriesRaw: ServiceCategory[] = [
   {
     id: "cat-cut",
     slug: "strzyzenie",
@@ -41,7 +42,7 @@ export const serviceCategories: ServiceCategory[] = [
   },
 ];
 
-export const services: Service[] = [
+const servicesRaw: Service[] = [
   // Strzyżenie i modelowanie
   {
     id: "svc-cut-women",
@@ -254,3 +255,16 @@ export const services: Service[] = [
     staffIds: ["maja", "natalia"],
   },
 ];
+
+/** Nazwy i opisy z twardymi spacjami po jednoliterowych słowach (bez sierotek). */
+export const serviceCategories: ServiceCategory[] = categoriesRaw.map((c) => ({
+  ...c,
+  name: sierotki(c.name),
+  description: sierotki(c.description),
+}));
+
+export const services: Service[] = servicesRaw.map((s) => ({
+  ...s,
+  name: sierotki(s.name),
+  description: sierotki(s.description),
+}));

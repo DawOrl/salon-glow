@@ -355,7 +355,7 @@ export function BookingWizard({
               )}
               <fieldset>
                 <legend className="text-sm text-muted">Dzień</legend>
-                <div className="no-scrollbar -mx-6 mt-3 flex snap-x gap-2 overflow-x-auto px-6 pb-1 lg:mx-0 lg:flex-wrap lg:px-0">
+                <div className="no-scrollbar -mx-6 mt-3 flex snap-x scroll-px-6 gap-2 overflow-x-auto px-6 pb-1 lg:mx-0 lg:flex-wrap lg:px-0">
                   {days.map((d) => {
                     const on = date === d.iso;
                     return (
@@ -603,11 +603,6 @@ export function BookingWizard({
             >
               Dalej: {STEPS[step]}
             </button>
-            {stepError && (
-              <p role="alert" className="text-sm text-terracotta-ink">
-                {stepError}
-              </p>
-            )}
           </div>
         )}
       </div>
@@ -630,7 +625,21 @@ export function BookingWizard({
               {formatDuration(service.durationMin)}
             </p>
           )}
-          <p className="mt-6 text-sm text-muted">
+          {step < 4 && (
+            <button
+              type="button"
+              onClick={() => goTo(step + 1)}
+              className="press mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-pill bg-terracotta-deep px-6 text-sm font-medium text-cream transition-colors duration-300 hover:bg-[#84503f]"
+            >
+              Dalej: {STEPS[step]}
+            </button>
+          )}
+          {stepError && (
+            <p role="alert" className="mt-3 text-sm text-terracotta-ink">
+              {stepError}
+            </p>
+          )}
+          <p className="mt-5 text-sm text-muted">
             Rezerwujesz bezpośrednio u nas, bez prowizji pośredników.
           </p>
         </div>

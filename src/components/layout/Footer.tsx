@@ -121,7 +121,7 @@ export function Footer() {
 
         <div className="mt-14 flex flex-col gap-2 border-t border-line pt-6 text-xs text-muted md:flex-row md:items-center md:justify-between">
           <p>
-            © {year} {salon.legalName ?? salon.name}. Wszelkie prawa zastrzeżone.
+            © {year} {salon.legalName ?? salon.name} Wszelkie prawa zastrzeżone.
           </p>
           <p className="max-w-md md:text-right">
             Projekt demonstracyjny: salon, zespół, opinie i zdjęcia są fikcyjne

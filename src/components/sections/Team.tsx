@@ -60,7 +60,7 @@ export function Team() {
         </article>
       </Reveal>
 
-      <ul className="no-scrollbar -mx-6 mt-16 flex snap-x snap-mandatory gap-5 overflow-x-auto px-6 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-8 sm:overflow-visible sm:px-0">
+      <ul className="no-scrollbar -mx-6 mt-16 flex snap-x snap-mandatory scroll-px-6 gap-5 overflow-x-auto px-6 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-8 sm:overflow-visible sm:px-0">
         {rest.map((person, i) => (
           <li key={person.id} className="w-[78%] shrink-0 snap-start sm:w-auto">
             <Reveal delay={i * 80}>

@@ -27,9 +27,9 @@ export function Hero() {
             </h1>
 
             <p className="mt-8 max-w-md text-lg leading-relaxed text-ink-soft">
-              Autorskie studio strzyżenia, balayage i regeneracji w sercu
-              Warszawy. Umów wizytę bezpośrednio u nas, bez pośredników
-              i bez prowizji.
+              Autorskie studio strzyżenia, balayage i&nbsp;regeneracji w&nbsp;sercu
+              Warszawy. Umów wizytę bezpośrednio u&nbsp;nas, bez pośredników
+              i&nbsp;bez prowizji.
             </p>
 
             <div className="mt-9 flex flex-wrap items-center gap-3 sm:gap-4">

@@ -24,9 +24,9 @@ export function BeforeAfter() {
     <Section id="metamorfozy" className="border-t border-line bg-sand/35">
       <Reveal>
         <Eyebrow index="02">Metamorfozy</Eyebrow>
-        <div className="mt-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="mt-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <h2 className="max-w-2xl font-display text-display font-light text-ink">
-            Przeciągnij i zobacz różnicę
+            Przeciągnij i&nbsp;zobacz różnicę
           </h2>
           <p className="max-w-sm text-sm text-muted">
             Ta sama osoba, to samo światło, ten sam kadr. Zmieniają się tylko
@@ -44,7 +44,9 @@ export function BeforeAfter() {
             sizes="(min-width: 1152px) 540px, (min-width: 1024px) 46vw, 100vw"
           />
           <p className="mt-3 flex items-center justify-between gap-4 text-sm text-muted">
-            <span>Przeciągnij albo użyj strzałek na klawiaturze.</span>
+            <span>
+              Przeciągnij suwak<span className="hidden lg:inline"> albo użyj strzałek na klawiaturze</span>.
+            </span>
             <button
               type="button"
               onClick={() => setOpen(true)}
@@ -66,7 +68,7 @@ export function BeforeAfter() {
             <h3 className="mt-2 font-display text-title font-light text-ink">
               {item.title}
             </h3>
-            <dl className="mt-6 grid grid-cols-3 gap-4 border-y border-line py-5 text-sm">
+            <dl className="mt-6 grid grid-cols-2 gap-4 border-y border-line py-5 text-sm sm:grid-cols-3">
               <div>
                 <dt className="text-muted">Usługa</dt>
                 <dd className="mt-1 text-ink">{item.serviceName}</dd>
@@ -91,7 +93,7 @@ export function BeforeAfter() {
 
           <Reveal className="mt-10">
             <h4 className="text-sm text-muted">Wybierz metamorfozę</h4>
-            <ul className="no-scrollbar -mx-6 mt-3 flex snap-x gap-3 overflow-x-auto px-6 pb-2 lg:mx-0 lg:grid lg:grid-cols-2 lg:gap-x-6 lg:gap-y-1 lg:overflow-visible lg:px-0">
+            <ul className="no-scrollbar -mx-6 mt-3 flex snap-x scroll-px-6 gap-3 overflow-x-auto px-6 pb-2 lg:mx-0 lg:grid lg:grid-cols-2 lg:gap-x-6 lg:gap-y-1 lg:overflow-visible lg:px-0">
               {transformations.map((t, i) => {
                 const on = i === active;
                 return (

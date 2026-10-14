@@ -25,3 +25,11 @@ export function pluralUslugi(n: number) {
   if (d >= 2 && d <= 4 && (t < 12 || t > 14)) return "usługi";
   return "usług";
 }
+
+/**
+ * Polska typografia: jednoliterowe spójniki i przyimki (a, i, o, u, w, z)
+ * nie mogą zostać na końcu wiersza, więc wiążemy je twardą spacją z kolejnym słowem.
+ */
+export function sierotki(text: string) {
+  return text.replace(/(^|\s)([aiouwzAIOUWZ])\s+/g, "$1$2 ");
+}

@@ -42,7 +42,7 @@ export function Services() {
     <Section id="cennik" className="border-t border-line">
       <Reveal>
         <Eyebrow index="03">Karta usług</Eyebrow>
-        <div className="mt-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="mt-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <h2 className="max-w-2xl font-display text-display font-light text-ink">
             Cennik, w którym wszystko jest jasne
           </h2>
@@ -58,7 +58,7 @@ export function Services() {
           <div
             role="tablist"
             aria-label="Kategorie usług"
-            className="no-scrollbar -mx-6 flex gap-2 overflow-x-auto px-6 lg:mx-0 lg:flex-col lg:gap-0 lg:overflow-visible lg:border-t lg:border-line lg:px-0"
+            className="no-scrollbar -mx-6 flex scroll-px-6 gap-2 overflow-x-auto px-6 lg:mx-0 lg:flex-col lg:gap-0 lg:overflow-visible lg:border-t lg:border-line lg:px-0"
           >
             {serviceCategories.map((c, i) => {
               const on = i === active;

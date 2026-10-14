@@ -138,11 +138,34 @@ export default async function ServicePage({
                 Zadzwoń
               </Button>
             </div>
+
+            {related.length > 0 && (
+              <div className="mt-14 max-w-xl">
+                <h2 className="font-display text-lg italic text-ink-soft">
+                  W tej samej kategorii
+                </h2>
+                <ul className="mt-4 divide-y divide-line/70">
+                  {related.map((s) => (
+                    <li key={s.id}>
+                      <Link
+                        href={`/uslugi/${s.slug}`}
+                        className="flex min-h-11 items-center justify-between gap-4 py-3 text-sm transition-colors hover:text-terracotta-ink"
+                      >
+                        <span className="text-ink">{s.name}</span>
+                        <span className="shrink-0 tabular-nums text-muted">
+                          {formatPrice(s)}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
-          {/* Karta podsumowania + powiązane */}
+          {/* Zdjęcie efektu (metamorfoza tej usługi albo detal studia) */}
           <aside className="lg:pt-10">
-            <figure className="mb-8">
+            <figure>
               <div className="arch relative aspect-4/5 w-full max-w-sm overflow-hidden bg-sand">
                 <Photo
                   src={example?.afterImage ?? "/studio/detal.webp"}
@@ -165,49 +188,6 @@ export default async function ServicePage({
                 </figcaption>
               )}
             </figure>
-            <div className="rounded-card border border-line bg-sand/30 p-7">
-              <dl className="space-y-3 text-sm">
-                <div className="flex justify-between border-b border-line pb-3">
-                  <dt className="text-muted">Cena</dt>
-                  <dd className="font-medium text-ink">{formatPrice(service)}</dd>
-                </div>
-                <div className="flex justify-between border-b border-line pb-3">
-                  <dt className="text-muted">Czas</dt>
-                  <dd className="text-ink">
-                    {formatDuration(service.durationMin)}
-                  </dd>
-                </div>
-                {category && (
-                  <div className="flex justify-between">
-                    <dt className="text-muted">Kategoria</dt>
-                    <dd className="text-ink">{category.name}</dd>
-                  </div>
-                )}
-              </dl>
-            </div>
-
-            {related.length > 0 && (
-              <div className="mt-8">
-                <h2 className="font-display text-lg italic text-ink-soft">
-                  W tej samej kategorii
-                </h2>
-                <ul className="mt-4 divide-y divide-line/70">
-                  {related.map((s) => (
-                    <li key={s.id}>
-                      <Link
-                        href={`/uslugi/${s.slug}`}
-                        className="flex min-h-11 items-center justify-between gap-4 py-3 text-sm transition-colors hover:text-terracotta-ink"
-                      >
-                        <span className="text-ink">{s.name}</span>
-                        <span className="shrink-0 tabular-nums text-muted">
-                          {formatPrice(s)}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
           </aside>
         </div>
       </Container>

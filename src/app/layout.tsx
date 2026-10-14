@@ -44,6 +44,7 @@ export default function RootLayout({
   return (
     <html
       lang="pl"
+      data-scroll-behavior="smooth"
       className={`${fraunces.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full">

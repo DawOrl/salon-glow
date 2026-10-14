@@ -1,4 +1,5 @@
 import type { Transformation } from "@/lib/types";
+import { sierotki } from "@/lib/format";
 
 /**
  * Metamorfozy „przed/po”: bohater sekcji galerii (suwak w BeforeAfter).
@@ -6,7 +7,7 @@ import type { Transformation } from "@/lib/types";
  * edycją zdjęcia „przed”, więc to ta sama osoba, kadr, ubranie i światło,
  * a zmieniają się wyłącznie włosy. Zob. scripts/optimize-media.mjs.
  */
-export const transformations: Transformation[] = [
+const transformationsRaw: Transformation[] = [
   {
     id: "tr-1",
     title: "Ciepły balayage na bazie brunet",
@@ -89,3 +90,8 @@ export const transformations: Transformation[] = [
     tags: ["sombre", "glamour", "fale"],
   },
 ];
+
+export const transformations: Transformation[] = transformationsRaw.map((t) => ({
+  ...t,
+  title: sierotki(t.title),
+}));

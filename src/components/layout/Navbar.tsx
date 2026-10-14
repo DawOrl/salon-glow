@@ -61,7 +61,7 @@ export function Navbar() {
         </Link>
 
         {/* Desktop */}
-        <ul className="hidden items-center gap-9 md:flex">
+        <ul className="hidden items-center gap-8 lg:flex">
           {links.map((l) => (
             <li key={l.href}>
               <Link
@@ -74,7 +74,7 @@ export function Navbar() {
           ))}
         </ul>
 
-        <div className="hidden md:block">
+        <div className="hidden lg:block">
           <Button href="/rezerwacja" className="px-6 py-3">
             Umów wizytę
           </Button>
@@ -83,7 +83,7 @@ export function Navbar() {
         {/* Hamburger (mobile) */}
         <button
           type="button"
-          className="flex h-11 w-11 items-center justify-center rounded-full md:hidden"
+          className="flex h-11 w-11 items-center justify-center rounded-full lg:hidden"
           aria-expanded={open}
           aria-controls="mobile-menu"
           aria-label={open ? "Zamknij menu" : "Otwórz menu"}
@@ -109,10 +109,20 @@ export function Navbar() {
         </button>
       </nav>
 
-      {/* Panel mobilny */}
+      {/* Przyciemnienie pod panelem: kliknięcie zamyka menu */}
+      <div
+        aria-hidden
+        onClick={() => setOpen(false)}
+        className={`fixed inset-x-0 top-20 bottom-0 -z-10 bg-ink/25 transition-opacity duration-300 lg:hidden ${
+          open ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      />
+
+      {/* Panel mobilny (inert, gdy zamknięty: linki poza kolejnością Tab) */}
       <div
         id="mobile-menu"
-        className={`overflow-hidden border-t border-line/60 bg-cream md:hidden ${
+        inert={!open}
+        className={`overflow-hidden border-t border-line/60 bg-cream lg:hidden ${
           open ? "max-h-[80vh]" : "max-h-0 border-transparent"
         } transition-[max-height] duration-500 ease-silk`}
       >
