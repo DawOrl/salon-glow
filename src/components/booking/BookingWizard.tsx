@@ -12,7 +12,7 @@ import Image from "next/image";
 import { createReservation, type BookingState } from "@/app/lib/actions";
 import { serviceCategories, services } from "@/data/services";
 import { getServiceById, getStaffForService } from "@/lib/queries";
-import { formatDuration, formatPrice } from "@/lib/format";
+import { formatDuration, formatPrice, sierotki } from "@/lib/format";
 import { salon } from "@/lib/salon";
 import { getAvailableDays, getSlotsForDay, type DayOption } from "@/lib/slots";
 import { imageMeta } from "@/lib/imageMeta";
@@ -205,7 +205,7 @@ export function BookingWizard({
       >
         {text}
       </h2>
-      {sub && <p className="mt-2 text-sm text-muted">{sub}</p>}
+      {sub && <p className="mt-2 text-sm text-muted">{sierotki(sub)}</p>}
     </div>
   );
 
