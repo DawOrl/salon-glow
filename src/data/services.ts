@@ -1,7 +1,7 @@
 import type { Service, ServiceCategory } from "@/lib/types";
 
 /**
- * Cennik Glow Studio — realne widełki dla salonu premium w Warszawie.
+ * Cennik Glow Studio: realne widełki dla salonu premium w Warszawie.
  * Ceny w PLN; „od” bo finalna cena koloryzacji zależy od długości i gęstości włosów.
  * Czasy trwania zasilają kreator rezerwacji i siatkę slotów.
  */
@@ -20,7 +20,7 @@ export const serviceCategories: ServiceCategory[] = [
     slug: "koloryzacja",
     name: "Koloryzacja",
     description:
-      "Balayage, sombre i koloryzacje na miarę — od naturalnego rozświetlenia po pełną metamorfozę.",
+      "Balayage, sombre i koloryzacje na miarę: od naturalnego rozświetlenia po pełną metamorfozę.",
     order: 2,
   },
   {
@@ -28,7 +28,7 @@ export const serviceCategories: ServiceCategory[] = [
     slug: "pielegnacja",
     name: "Pielęgnacja i regeneracja",
     description:
-      "Keratyna, nanoplastia i zabiegi odbudowujące — zdrowie i blask włosa na dłużej.",
+      "Keratyna, nanoplastia i zabiegi odbudowujące. Zdrowie i blask włosa na dłużej.",
     order: 3,
   },
   {
@@ -36,13 +36,13 @@ export const serviceCategories: ServiceCategory[] = [
     slug: "stylizacja",
     name: "Stylizacja i okazje",
     description:
-      "Upięcia, fale i makijaż na wyjątkowe chwile — z próbą przed dniem ślubu.",
+      "Upięcia, fale i makijaż na wyjątkowe chwile, z próbą przed dniem ślubu.",
     order: 4,
   },
 ];
 
 export const services: Service[] = [
-  // — Strzyżenie i modelowanie —
+  // Strzyżenie i modelowanie
   {
     id: "svc-cut-women",
     slug: "strzyzenie-damskie",
@@ -73,7 +73,7 @@ export const services: Service[] = [
     slug: "modelowanie",
     categoryId: "cat-cut",
     name: "Modelowanie / fryzura",
-    description: "Mycie i modelowanie — prosto, w fale lub objętościowo.",
+    description: "Mycie i modelowanie: prosto, w fale lub objętościowo.",
     priceFrom: 90,
     priceTo: 140,
     currency: "PLN",
@@ -92,7 +92,7 @@ export const services: Service[] = [
     staffIds: ["natalia", "kris"],
   },
 
-  // — Koloryzacja —
+  // Koloryzacja
   {
     id: "svc-color-balayage",
     slug: "balayage-sombre",
@@ -156,7 +156,7 @@ export const services: Service[] = [
     staffIds: ["maja"],
   },
 
-  // — Pielęgnacja i regeneracja —
+  // Pielęgnacja i regeneracja
   {
     id: "svc-care-keratin",
     slug: "keratynowe-prostowanie",
@@ -199,14 +199,14 @@ export const services: Service[] = [
     slug: "rytual-skory-glowy",
     categoryId: "cat-care",
     name: "Rytuał pielęgnacyjny skóry głowy",
-    description: "Peeling, masaż i odżywienie skóry głowy — reset i relaks.",
+    description: "Peeling, masaż i odżywienie skóry głowy. Reset i relaks.",
     priceFrom: 160,
     currency: "PLN",
     durationMin: 50,
     staffIds: ["ola"],
   },
 
-  // — Stylizacja i okazje —
+  // Stylizacja i okazje
   {
     id: "svc-style-updo",
     slug: "upiecie-okazjonalne",

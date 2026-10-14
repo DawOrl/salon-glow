@@ -1,16 +1,16 @@
 import type { SalonInfo } from "./types";
 
 /**
- * Dane kontaktowe / NAP salonu — jedno źródło prawdy dla stopki, sekcji
+ * Dane kontaktowe / NAP salonu: jedno źródło prawdy dla stopki, sekcji
  * kontakt oraz danych strukturalnych JSON-LD (Etap 4).
- * Lokalizacja: ul. Mokotowska — warszawska ulica mody i beauty (premium).
+ * Lokalizacja: ul. Mokotowska, warszawska ulica mody i beauty (premium).
  */
 export const salon: SalonInfo = {
   name: "Glow Studio",
   legalName: "Glow Studio sp. z o.o.",
   tagline: "Cisza, którą widać.",
   description:
-    "Autorskie studio fryzjerskie i koloryzacji w sercu Warszawy. Strzyżenie, balayage, regeneracja i stylizacje okazjonalne — z dbałością o detal i Twój czas.",
+    "Autorskie studio fryzjerskie i koloryzacji w sercu Warszawy. Strzyżenie, balayage, regeneracja i stylizacje okazjonalne, z dbałością o detal i Twój czas.",
   address: {
     street: "ul. Mokotowska 12",
     city: "Warszawa",

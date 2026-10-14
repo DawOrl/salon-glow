@@ -24,7 +24,7 @@ function openingHoursSpec() {
     }));
 }
 
-/** Dane strukturalne salonu (lokalne SEO) — @type HairSalon. */
+/** Dane strukturalne salonu (lokalne SEO): @type HairSalon. */
 export function salonJsonLd() {
   return {
     "@context": "https://schema.org",
@@ -59,7 +59,7 @@ export function salonJsonLd() {
   };
 }
 
-/** Dane strukturalne usługi — @type Service + Offer. */
+/** Dane strukturalne usługi: @type Service + Offer. */
 export function serviceJsonLd(service: Service, category?: ServiceCategory) {
   return {
     "@context": "https://schema.org",

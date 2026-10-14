@@ -19,7 +19,7 @@ export async function createReservation(
   _prev: BookingState,
   formData: FormData,
 ): Promise<BookingState> {
-  // Honeypot — ukryte pole wypełniane tylko przez boty.
+  // Honeypot: ukryte pole wypełniane tylko przez boty.
   if (String(formData.get("website") ?? "").length > 0) {
     return { ok: false, message: "Nie udało się wysłać formularza." };
   }
@@ -59,7 +59,7 @@ export async function createReservation(
       message: "Wybrana usługa jest niedostępna.",
     };
   }
-  // Twarda walidacja stylisty — nieznane ID traktujemy jak „pierwszy wolny”.
+  // Twarda walidacja stylisty: nieznane ID traktujemy jak „pierwszy wolny”.
   const staffValid =
     data.staffId === "any" || Boolean(getStaffById(data.staffId));
   const staffId = staffValid ? data.staffId : "any";

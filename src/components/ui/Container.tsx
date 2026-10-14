@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-/** Centralna oś treści — spójna szerokość i marginesy boczne. */
+/** Centralna oś treści: spójna szerokość i marginesy boczne. */
 export function Container({
   children,
   className = "",

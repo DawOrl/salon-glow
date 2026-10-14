@@ -72,9 +72,11 @@ export function Lightbox({
         aria-label="Zamknij"
         className="absolute right-5 top-5 flex h-11 w-11 items-center justify-center rounded-full bg-cream/10 text-cream ring-1 ring-cream/30 transition duration-300 ease-silk hover:bg-cream/20"
       >
-        ✕
+        <svg aria-hidden width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="m1 1 12 12M13 1 1 13" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+        </svg>
       </button>
-      <div className="w-full max-w-md">{children}</div>
+      <div className="w-full max-w-[min(92vw,calc((100svh-9rem)*0.8))]">{children}</div>
     </div>
   );
 }

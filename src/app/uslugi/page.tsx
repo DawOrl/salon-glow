@@ -10,12 +10,12 @@ import { formatDuration, formatPrice } from "@/lib/format";
 export const metadata: Metadata = {
   title: "Usługi i cennik",
   description:
-    "Pełny cennik Glow Studio — strzyżenie, koloryzacja, pielęgnacja i stylizacje okazjonalne. Ceny i czas trwania każdej usługi.",
+    "Pełny cennik Glow Studio: strzyżenie, koloryzacja, pielęgnacja i stylizacje okazjonalne. Ceny i czas trwania każdej usługi.",
 };
 
 export default function ServicesIndex() {
   return (
-    <div className="pt-28 pb-24">
+    <div className="pt-28 pb-24 md:pt-32">
       <Container>
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="max-w-2xl">
@@ -24,7 +24,7 @@ export default function ServicesIndex() {
               Pełny cennik
             </h1>
             <p className="mt-5 text-ink-soft">
-              Ceny „od” — ostateczna zależy od długości i gęstości włosów oraz
+              Ceny „od”: ostateczna zależy od długości i gęstości włosów oraz
               zakresu pracy. Każdą usługę możesz od razu zarezerwować.
             </p>
           </div>
@@ -34,23 +34,26 @@ export default function ServicesIndex() {
         </div>
 
         <div className="mt-14 space-y-14">
-          {serviceCategories.map((cat) => (
-            <section key={cat.id}>
-              <div className="border-b border-line pb-4">
-                <h2 className="font-display text-title text-ink">{cat.name}</h2>
-                <p className="mt-2 max-w-xl text-sm text-muted">
+          {serviceCategories.map((cat, i) => (
+            <section key={cat.id} className="grid gap-6 lg:grid-cols-12">
+              <div className="lg:col-span-4">
+                <p className="font-display text-sm italic text-terracotta-ink">
+                  N°{String(i + 1).padStart(2, "0")}
+                </p>
+                <h2 className="mt-1 font-display text-title font-light text-ink">{cat.name}</h2>
+                <p className="mt-2 max-w-sm text-sm text-muted">
                   {cat.description}
                 </p>
               </div>
-              <ul className="divide-y divide-line/70">
+              <ul className="border-t border-line lg:col-span-8">
                 {getServicesByCategory(cat.id).map((s) => (
-                  <li key={s.id}>
+                  <li key={s.id} className="border-b border-line">
                     <Link
                       href={`/uslugi/${s.slug}`}
-                      className="group flex items-center justify-between gap-4 py-5 transition-colors duration-300 ease-silk hover:text-terracotta"
+                      className="group flex items-center justify-between gap-4 py-5 transition-colors duration-300 ease-silk"
                     >
                       <span className="min-w-0">
-                        <span className="block font-medium text-ink group-hover:text-terracotta">
+                        <span className="block font-medium text-ink group-hover:text-terracotta-ink">
                           {s.name}
                         </span>
                         <span className="mt-1 block text-sm text-muted">
@@ -58,7 +61,7 @@ export default function ServicesIndex() {
                         </span>
                       </span>
                       <span className="shrink-0 text-right">
-                        <span className="block whitespace-nowrap font-medium tabular-nums text-ink">
+                        <span className="block whitespace-nowrap font-display text-lg tabular-nums text-ink">
                           {formatPrice(s)}
                         </span>
                         <span className="block text-xs text-muted">

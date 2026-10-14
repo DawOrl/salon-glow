@@ -1,7 +1,7 @@
 /**
  * Wspólne typy domenowe Glow Studio.
  * Obrazy trzymamy jako ścieżki do /public (string). Przy realnej sesji
- * zdjęciowej można przejść na statyczny import (StaticImageData) — wtedy
+ * zdjęciowej można przejść na statyczny import (StaticImageData): wtedy
  * next/image dostaje automatyczny blurDataURL i wymiary bez CLS.
  */
 
@@ -11,7 +11,7 @@ export interface ServiceCategory {
   id: string;
   slug: string;
   name: string;
-  /** Krótki opis kategorii — eyebrow/lead w sekcji cennika. */
+  /** Krótki opis kategorii: eyebrow/lead w sekcji cennika. */
   description: string;
   order: number;
 }
@@ -27,10 +27,10 @@ export interface Service {
   /** Górna granica widełek (opcjonalna). */
   priceTo?: number;
   currency: Currency;
-  /** Czas trwania w minutach — do kreatora rezerwacji i cennika. */
+  /** Czas trwania w minutach: do kreatora rezerwacji i cennika. */
   durationMin: number;
   popular?: boolean;
-  /** Którzy styliści wykonują usługę — filtr w kreatorze. */
+  /** Którzy styliści wykonują usługę: filtr w kreatorze. */
   staffIds: string[];
 }
 
@@ -61,7 +61,7 @@ export interface Transformation {
   durationMin: number;
   beforeImage: string;
   afterImage: string;
-  /** Opis alternatywny — wspólny dla pary przed/po. */
+  /** Opis alternatywny: wspólny dla pary przed/po. */
   alt: string;
   tags: string[];
   featured?: boolean;
@@ -86,7 +86,7 @@ export interface SalonRating {
   total: number;
 }
 
-/** Slot terminu — w MVP dane mockowane; docelowo z bazy/kalendarza. */
+/** Slot terminu: w MVP dane mockowane; docelowo z bazy/kalendarza. */
 export interface TimeSlot {
   /** ISO yyyy-mm-dd. */
   date: string;
@@ -125,6 +125,6 @@ export interface SalonInfo {
   priceRange: string;
   socials: { instagram?: string; facebook?: string; tiktok?: string };
   mapEmbedUrl: string;
-  /** Polityka odwołań — wyświetlana przy rezerwacji. */
+  /** Polityka odwołań: wyświetlana przy rezerwacji. */
   bookingPolicy: string;
 }

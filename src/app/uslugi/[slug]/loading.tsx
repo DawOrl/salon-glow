@@ -1,6 +1,6 @@
 import { Container } from "@/components/ui/Container";
 
-/** Skeleton podstrony usługi — pokazywany podczas nawigacji/streamingu. */
+/** Skeleton podstrony usługi: pokazywany podczas nawigacji/streamingu. */
 export default function Loading() {
   return (
     <div className="pt-28 pb-24" aria-busy="true" aria-label="Wczytywanie usługi">

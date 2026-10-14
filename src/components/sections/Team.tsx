@@ -1,69 +1,93 @@
-import Link from "next/link";
 import { Reveal } from "../ui/Reveal";
 import { Section } from "../ui/Section";
 import { Eyebrow } from "../ui/Eyebrow";
 import { Photo } from "../ui/Photo";
 import { team } from "@/data/team";
+import type { StaffMember } from "@/lib/types";
 
+function Rating({ person }: { person: StaffMember }) {
+  if (!person.rating) return null;
+  return (
+    <span className="text-sm text-muted">
+      <span aria-hidden className="text-champagne">
+        ★
+      </span>{" "}
+      <span className="tabular-nums text-ink">
+        {person.rating.toLocaleString("pl-PL", { minimumFractionDigits: 1 })}
+      </span>
+      {person.reviewCount ? ` · ${person.reviewCount} opinii` : ""}
+    </span>
+  );
+}
+
+/** Zespół: założycielka wyróżniona szerokim kadrem, reszta w rzędzie. */
 export function Team() {
+  const [lead, ...rest] = team;
+
   return (
     <Section id="zespol" className="border-t border-line">
       <Reveal>
-        <Eyebrow>Zespół</Eyebrow>
+        <Eyebrow index="04">Zespół</Eyebrow>
         <h2 className="mt-5 max-w-2xl font-display text-display font-light text-ink">
           Ludzie, którym powierzysz włosy
         </h2>
       </Reveal>
 
-      <div className="mt-12 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
-        {team.map((member, i) => (
-          <Reveal
-            key={member.id}
-            // Lekka asymetria — co druga karta delikatnie opuszczona.
-            className={i % 2 === 1 ? "lg:mt-10" : ""}
-          >
-            <article className="flex h-full flex-col">
-              <div className="relative aspect-4/5 w-full overflow-hidden rounded-card bg-sand ring-1 ring-line">
-                <Photo
-                  src={member.photo}
-                  alt={`${member.name} — ${member.role}`}
-                  sizes="(min-width: 1024px) 22vw, (min-width: 640px) 45vw, 90vw"
-                  className="object-cover transition-transform duration-700 ease-silk hover:scale-105"
-                />
-              </div>
+      <Reveal className="mt-12">
+        <article className="grid items-center gap-8 md:grid-cols-12 md:gap-12">
+          <div className="relative aspect-4/5 overflow-hidden rounded-card bg-sand md:col-span-5">
+            <Photo
+              src={lead.photo}
+              alt={`${lead.name}, ${lead.role}`}
+              sizes="(min-width: 1152px) 440px, (min-width: 768px) 40vw, 100vw"
+            />
+          </div>
+          <div className="md:col-span-7">
+            <p className="font-display text-lg italic text-terracotta-ink">
+              {lead.role}
+            </p>
+            <h3 className="mt-2 font-display text-title font-light text-ink">
+              {lead.name}
+            </h3>
+            <p className="mt-6 max-w-xl font-display text-xl leading-relaxed font-light text-ink-soft md:text-2xl">
+              {lead.bio}
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-line pt-5">
+              <p className="text-sm text-ink-soft">{lead.specialties.join(" · ")}</p>
+              <Rating person={lead} />
+            </div>
+          </div>
+        </article>
+      </Reveal>
 
-              <div className="mt-5">
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-display text-xl text-ink">{member.name}</h3>
-                  {member.rating && (
-                    <span className="shrink-0 text-xs text-muted">
-                      <span className="text-champagne">★</span>{" "}
-                      {member.rating.toLocaleString("pl-PL")}
-                    </span>
-                  )}
+      <ul className="no-scrollbar -mx-6 mt-16 flex snap-x snap-mandatory gap-5 overflow-x-auto px-6 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:gap-8 sm:overflow-visible sm:px-0">
+        {rest.map((person, i) => (
+          <li key={person.id} className="w-[78%] shrink-0 snap-start sm:w-auto">
+            <Reveal delay={i * 80}>
+              <article>
+                <div className="relative aspect-4/5 overflow-hidden rounded-card bg-sand">
+                  <Photo
+                    src={person.photo}
+                    alt={`${person.name}, ${person.role}`}
+                    sizes="(min-width: 1152px) 360px, (min-width: 640px) 31vw, 78vw"
+                  />
                 </div>
-                <p className="mt-1 text-sm text-terracotta">{member.role}</p>
-                <p className="mt-3 text-sm leading-relaxed text-muted">
-                  {member.bio}
+                <div className="mt-5 flex items-baseline justify-between gap-3">
+                  <h3 className="font-display text-xl text-ink">{person.name}</h3>
+                  <Rating person={{ ...person, reviewCount: undefined }} />
+                </div>
+                <p className="mt-1 font-display text-sm italic text-terracotta-ink">
+                  {person.role}
                 </p>
-                <p className="mt-4 text-xs uppercase tracking-[0.14em] text-ink-soft">
-                  {member.specialties.join(" · ")}
+                <p className="mt-3 text-sm leading-relaxed text-muted">{person.bio}</p>
+                <p className="mt-4 text-xs text-ink-soft">
+                  {person.specialties.join(" · ")}
                 </p>
-                {member.instagram && (
-                  <Link
-                    href={member.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-4 inline-block text-sm text-ink-soft underline-offset-4 transition-colors hover:text-terracotta hover:underline"
-                  >
-                    Instagram
-                  </Link>
-                )}
-              </div>
-            </article>
-          </Reveal>
+              </article>
+            </Reveal>
+          </li>
         ))}
-      </div>
+      </ul>
     </Section>
   );
 }

@@ -16,3 +16,12 @@ export function formatDuration(min: number) {
   if (h) return `${h} h`;
   return `${m} min`;
 }
+
+/** Odmiana: 1 usługa, 2-4 usługi, 5+ usług (z wyjątkiem 12-14). */
+export function pluralUslugi(n: number) {
+  if (n === 1) return "usługa";
+  const d = n % 10;
+  const t = n % 100;
+  if (d >= 2 && d <= 4 && (t < 12 || t > 14)) return "usługi";
+  return "usług";
+}

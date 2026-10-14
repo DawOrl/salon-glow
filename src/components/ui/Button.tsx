@@ -4,15 +4,15 @@ import type { ReactNode } from "react";
 type Variant = "primary" | "outline" | "ghost";
 
 const base =
-  "group inline-flex items-center justify-center gap-2 rounded-pill px-7 py-3.5 text-sm font-medium tracking-wide transition duration-300 ease-silk disabled:pointer-events-none disabled:opacity-50";
+  "group inline-flex min-h-11 items-center justify-center gap-2 rounded-pill px-7 py-3.5 text-sm font-medium tracking-wide transition-[background-color,border-color,color,transform] duration-300 ease-silk active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50";
 
 const variants: Record<Variant, string> = {
-  // Jedyny mocny akcent marki — terakota.
+  // Jedyny mocny akcent marki: terakota (ciemniejszy odcień = kontrast AA z kremem).
   primary:
-    "bg-terracotta text-cream hover:bg-terracotta-deep hover:-translate-y-0.5 shadow-[0_8px_24px_-12px_rgba(156,95,75,0.6)]",
+    "bg-terracotta-deep text-cream hover:bg-[#84503f] shadow-[0_10px_24px_-14px_rgba(132,80,63,0.7)]",
   outline:
-    "border border-ink/15 text-ink hover:border-ink/40 hover:bg-ink/[0.03]",
-  ghost: "text-ink hover:text-terracotta",
+    "border border-ink/20 text-ink hover:border-ink/45 hover:bg-ink/[0.03]",
+  ghost: "text-ink hover:text-terracotta-ink",
 };
 
 interface ButtonProps {

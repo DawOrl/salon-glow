@@ -1,37 +1,38 @@
 @import "tailwindcss";
 
 /* ============================================================
-   GLOW STUDIO — Design system "Quiet Atelier"
+   GLOW STUDIO: Design system "Quiet Atelier"
    Quiet luxury / editorial. Kremowa baza, kontrastowy serif,
    jeden terakotowy akcent, jeden spójny "język ruchu".
    ============================================================ */
 
 @theme {
-  /* — Paleta — */
-  --color-cream: #faf7f2; /* Cloud Dancer — tło ~85% */
-  --color-ink: #1a1714; /* espresso — tekst, nagłówki */
+  /* Paleta */
+  --color-cream: #faf7f2; /* Cloud Dancer: tło ~85% */
+  --color-ink: #1a1714; /* espresso: tekst, nagłówki */
   --color-ink-soft: #4a4239; /* przygaszony tekst */
   --color-muted: #6f665b; /* tekst drugorzędny / eyebrow */
-  --color-champagne: #c9a87c; /* ciepłe złoto — hairline, akcent premium */
+  --color-champagne: #c9a87c; /* ciepłe złoto: hairline, akcent premium */
   --color-champagne-soft: #e9dcc4;
-  --color-sage: #8a9a82; /* drugi akcent — organiczne plamy */
+  --color-sage: #8a9a82; /* drugi akcent: organiczne plamy */
   --color-sand: #e8dfd3; /* karty, sekcje przedzielające */
   --color-line: #e7ddcf; /* hairline / obramowania */
-  --color-terracotta: #b6755f; /* JEDYNY mocny akcent — CTA */
-  --color-terracotta-deep: #9c5f4b;
+  --color-terracotta: #b6755f; /* JEDYNY mocny akcent: duże litery, grafika */
+  --color-terracotta-deep: #9c5f4b; /* tło CTA (kontrast z kremem 4,7:1) */
+  --color-terracotta-ink: #8f5342; /* mały tekst akcentowy (5,6:1 na kremie) */
 
-  /* — Semantyka — */
+  /* Semantyka */
   --color-background: var(--color-cream);
   --color-foreground: var(--color-ink);
 
-  /* — Typografia — */
+  /* Typografia */
   --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
 
   /* Fluidowe skale display (clamp = bez breakpointów) */
-  --text-hero: clamp(3.25rem, 11vw, 9rem);
-  --text-hero--line-height: 0.9;
-  --text-hero--letter-spacing: -0.02em;
+  --text-hero: clamp(3.4rem, 10.5vw, 9.5rem);
+  --text-hero--line-height: 0.88;
+  --text-hero--letter-spacing: -0.025em;
   --text-display: clamp(2.5rem, 6vw, 5rem);
   --text-display--line-height: 1;
   --text-display--letter-spacing: -0.015em;
@@ -41,11 +42,11 @@
   --text-eyebrow--line-height: 1;
   --text-eyebrow--letter-spacing: 0.18em;
 
-  /* — Ruch — jeden easing, trzy czasy (jedwabisty gest marki) — */
+  /* Ruch: jeden easing, trzy czasy (jedwabisty gest marki) */
   --ease-silk: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* — Promienie — */
+  /* Promienie */
   --radius-card: 1.5rem;
   --radius-pill: 999px;
 }
@@ -72,6 +73,18 @@
     font-family: var(--font-sans);
     line-height: 1.7;
     font-synthesis-weight: none;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p,
+  li,
+  blockquote {
+    text-wrap: pretty;
   }
 
   ::selection {
@@ -105,14 +118,7 @@
    Utilities / komponenty wspólne
    ============================================================ */
 
-/* Szkło — sticky navbar, panele */
-.glass {
-  background: color-mix(in oklab, var(--color-cream) 72%, transparent);
-  backdrop-filter: blur(16px) saturate(1.25);
-  -webkit-backdrop-filter: blur(16px) saturate(1.25);
-}
-
-/* Subtelny film grain — fakturuje płaską biel (premium touch) */
+/* Subtelny film grain: fakturuje płaską biel (premium touch) */
 .grain {
   position: fixed;
   inset: 0;
@@ -123,13 +129,9 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* Kinetyczna typografia variable Fraunces (sterowane na scroll w Etapie 2) */
-.font-feature-display {
-  font-feature-settings: "ss01", "liga", "dlig";
-}
 
 /* ------------------------------------------------------------
-   "Blur-to-sharp reveal" — sygnaturowy gest.
+   "Blur-to-sharp reveal": sygnaturowy gest.
    1) Natywny CSS scroll-driven (wątek kompozytora, 60fps).
    2) Fallback IntersectionObserver (klasy dodaje Reveal.tsx),
       gdy brak scroll-timeline (np. Firefox bez flagi).
@@ -142,9 +144,8 @@
 @media (prefers-reduced-motion: no-preference) {
   .reveal--js {
     opacity: 0;
-    filter: blur(12px);
-    transform: translateY(28px);
-    will-change: opacity, transform, filter;
+    filter: blur(6px);
+    transform: translateY(18px);
   }
   .reveal--js.reveal--in {
     opacity: 1;
@@ -152,58 +153,54 @@
     transform: translateY(0);
     transition:
       opacity var(--dur-3) var(--ease-silk),
-      filter var(--dur-3) var(--ease-silk),
+      filter var(--dur-2) var(--ease-silk),
       transform var(--dur-3) var(--ease-silk);
+    transition-delay: var(--reveal-delay, 0ms);
   }
 }
 
 /* ------------------------------------------------------------
-   Suwak przed/po (BeforeAfter) — niewidoczny, pełnowymiarowy
-   <input type=range> obsługuje mysz, dotyk i klawiaturę; widoczny
-   uchwyt i przycięcie rysujemy osobno (sterowane stanem React).
+   Hero: jednorazowe "osiadanie" zdjęcia po wczytaniu (bez pętli).
    ------------------------------------------------------------ */
-.ba-range {
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
-  cursor: ew-resize;
-  margin: 0;
-  border-radius: var(--radius-card);
-}
-.ba-range:focus-visible {
-  outline: 2px solid var(--color-terracotta);
-  outline-offset: -2px;
-}
-.ba-range::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 2.75rem;
-  height: 100vh; /* przykryj całą wysokość kadru → łatwy chwyt */
-  background: transparent;
-  cursor: ew-resize;
-}
-.ba-range::-moz-range-thumb {
-  width: 2.75rem;
-  height: 100%;
-  border: 0;
-  background: transparent;
-  cursor: ew-resize;
-}
-.ba-range::-moz-range-track {
-  background: transparent;
-}
-
-/* Delikatny Ken Burns na posterze hero — tylko gdy ruch dozwolony. */
 @media (prefers-reduced-motion: no-preference) {
-  @keyframes kenburns {
+  @keyframes settle {
     from {
-      transform: scale(1) translateZ(0);
+      transform: scale(1.06);
     }
     to {
-      transform: scale(1.08) translateZ(0);
+      transform: scale(1);
     }
   }
-  .kenburns {
-    animation: kenburns 22s var(--ease-out-soft) infinite alternate;
+  .settle {
+    animation: settle 2.4s var(--ease-out-soft) both;
   }
+}
+
+/* Łuk okna kamienicy: motyw ramki zdjęć (hero, detale). */
+.arch {
+  border-radius: 999px 999px var(--radius-card) var(--radius-card);
+}
+
+/* Linia kropkowa w karcie usług: nazwa ........ cena */
+.leader {
+  flex: 1 1 auto;
+  min-width: 1.5rem;
+  border-bottom: 1px dotted color-mix(in oklab, var(--color-ink) 28%, transparent);
+  transform: translateY(-0.3em);
+}
+
+/* Poziome przewijanie bez paska (pasek dni, karuzela zespołu). */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Wspólny "nacisk" na elementach klikanych. */
+.press {
+  transition: transform 160ms var(--ease-silk);
+}
+.press:active {
+  transform: scale(0.97);
 }

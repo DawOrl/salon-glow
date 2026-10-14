@@ -6,56 +6,75 @@ import { reviews, salonRating } from "@/data/reviews";
 const sourceLabel: Record<string, string> = {
   google: "Google",
   instagram: "Instagram",
-  internal: "Klient",
+  internal: "Klientka",
 };
 
 function Stars({ rating }: { rating: number }) {
   return (
-    <span aria-label={`Ocena ${rating} na 5`} className="text-champagne">
-      {"★".repeat(rating)}
-      <span className="text-muted">{"★".repeat(5 - rating)}</span>
+    <span role="img" aria-label={`Ocena ${rating} na 5`} className="tracking-[0.12em]">
+      <span className="text-champagne">{"★".repeat(rating)}</span>
+      <span className="text-line">{"★".repeat(5 - rating)}</span>
     </span>
   );
 }
 
+/** Opinie: jedna wyróżniona, reszta jako spokojna lista bez kart. */
 export function Reviews() {
+  const [featured, ...rest] = reviews;
+
   return (
-    <Section id="opinie" className="border-t border-line bg-sand/30">
-      <Reveal>
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <div>
-            <Eyebrow>Opinie</Eyebrow>
-            <h2 className="mt-5 max-w-xl font-display text-display font-light text-ink">
-              Zaufały nam setki klientek
-            </h2>
-          </div>
-          <div className="flex items-center gap-4 rounded-card border border-line bg-cream px-6 py-4">
-            <span className="font-display text-4xl text-ink">
+    <Section id="opinie" className="border-t border-line bg-sand/35">
+      <div className="grid gap-12 lg:grid-cols-12">
+        <Reveal className="lg:col-span-5">
+          <Eyebrow index="05">Opinie</Eyebrow>
+          <h2 className="mt-5 font-display text-display font-light text-ink">
+            Zaufały nam setki klientek
+          </h2>
+          <div className="mt-10 flex items-end gap-5">
+            <span className="font-display text-7xl leading-none font-light text-ink tabular-nums md:text-8xl">
               {salonRating.average.toLocaleString("pl-PL")}
             </span>
-            <span className="text-sm text-muted">
+            <span className="pb-2 text-sm text-muted">
               <Stars rating={5} />
               <br />
               {salonRating.total} opinii w Google
             </span>
           </div>
-        </div>
-      </Reveal>
+        </Reveal>
 
-      <div className="mt-12 columns-1 gap-6 sm:columns-2 lg:columns-3 *:mb-6">
-        {reviews.map((r) => (
-          <Reveal key={r.id} className="break-inside-avoid">
-            <figure className="rounded-card border border-line bg-cream p-7">
-              <Stars rating={r.rating} />
-              <blockquote className="mt-4 text-ink-soft">„{r.text}”</blockquote>
-              <figcaption className="mt-5 flex items-center justify-between text-sm">
-                <span className="font-medium text-ink">{r.author}</span>
-                <span className="text-muted">{sourceLabel[r.source]}</span>
-              </figcaption>
-            </figure>
-          </Reveal>
-        ))}
+        <Reveal delay={100} className="lg:col-span-7 lg:pt-16">
+          <figure>
+            <blockquote className="font-display text-2xl leading-snug font-light text-ink md:text-[2rem]">
+              <span aria-hidden className="text-terracotta">
+                „
+              </span>
+              {featured.text}”
+            </blockquote>
+            <figcaption className="mt-6 flex items-center gap-4 text-sm">
+              <span className="font-medium text-ink">{featured.author}</span>
+              <span aria-hidden className="h-px w-6 bg-champagne" />
+              <span className="text-muted">{sourceLabel[featured.source]}</span>
+            </figcaption>
+          </figure>
+        </Reveal>
       </div>
+
+      <ul className="mt-16 grid gap-x-10 gap-y-10 border-t border-line pt-10 sm:grid-cols-2 lg:grid-cols-3">
+        {rest.map((r, i) => (
+          <li key={r.id}>
+            <Reveal delay={(i % 3) * 80}>
+              <figure>
+                <Stars rating={r.rating} />
+                <blockquote className="mt-3 text-ink-soft">„{r.text}”</blockquote>
+                <figcaption className="mt-4 flex items-center justify-between text-sm">
+                  <span className="font-medium text-ink">{r.author}</span>
+                  <span className="text-muted">{sourceLabel[r.source]}</span>
+                </figcaption>
+              </figure>
+            </Reveal>
+          </li>
+        ))}
+      </ul>
     </Section>
   );
 }

@@ -1,6 +1,6 @@
 import type { Review, SalonRating } from "@/lib/types";
 
-/** Zbiorcza ocena — social proof przy heroku, opiniach i kreatorze rezerwacji. */
+/** Zbiorcza ocena: social proof przy heroku, opiniach i kreatorze rezerwacji. */
 export const salonRating: SalonRating = {
   average: 4.9,
   total: 621,
@@ -21,7 +21,7 @@ export const reviews: Review[] = [
     id: "rv-2",
     author: "Tomasz W.",
     rating: 5,
-    text: "Wreszcie barber, który nie spieszy się i pyta zanim zetnie. Krzysztof to mistrz — wychodzę za każdym razem zadowolony.",
+    text: "Wreszcie barber, który nie spieszy się i pyta zanim zetnie. Krzysztof to mistrz, wychodzę za każdym razem zadowolony.",
     date: "2026-03-30",
     serviceId: "svc-cut-men",
     staffId: "kris",
@@ -41,7 +41,7 @@ export const reviews: Review[] = [
     id: "rv-4",
     author: "Magdalena K.",
     rating: 5,
-    text: "Robiłam u Natalii upięcie ślubne — trzymało się do białego rana. Próba przed ślubem dała mi spokój głowy.",
+    text: "Robiłam u Natalii upięcie ślubne. Trzymało się do białego rana. Próba przed ślubem dała mi spokój głowy.",
     date: "2026-05-11",
     serviceId: "svc-style-updo",
     staffId: "natalia",
@@ -51,7 +51,7 @@ export const reviews: Review[] = [
     id: "rv-5",
     author: "Joanna R.",
     rating: 5,
-    text: "Klimat studia jest cudowny — spokój, kawa, zero pośpiechu. Czuć, że liczy się klient, a nie kolejka.",
+    text: "Klimat studia jest cudowny: spokój, kawa, zero pośpiechu. Czuć, że liczy się klient, a nie kolejka.",
     date: "2026-02-21",
     source: "google",
   },

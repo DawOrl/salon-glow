@@ -4,12 +4,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/Button";
 
+// Pełne ścieżki "/#...", żeby linki działały także z podstron.
 const links = [
-  { href: "#uslugi", label: "Usługi" },
-  { href: "#metamorfozy", label: "Metamorfozy" },
-  { href: "#zespol", label: "Zespół" },
-  { href: "#opinie", label: "Opinie" },
-  { href: "#kontakt", label: "Kontakt" },
+  { href: "/#metamorfozy", label: "Metamorfozy" },
+  { href: "/#cennik", label: "Cennik" },
+  { href: "/#zespol", label: "Zespół" },
+  { href: "/#opinie", label: "Opinie" },
+  { href: "/#kontakt", label: "Kontakt" },
 ];
 
 export function Navbar() {
@@ -41,8 +42,10 @@ export function Navbar() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ease-silk ${
-        scrolled || open ? "glass border-b border-line/70" : "border-b border-transparent"
+      className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color] duration-500 ease-silk ${
+        scrolled || open
+          ? "border-b border-line/70 bg-cream/92 backdrop-blur-md"
+          : "border-b border-transparent"
       }`}
     >
       <nav
@@ -51,8 +54,8 @@ export function Navbar() {
       >
         <Link
           href="/"
-          className="font-display text-2xl italic tracking-tight text-ink"
-          aria-label="Glow Studio — strona główna"
+          className="inline-block py-2 font-display text-2xl italic tracking-tight text-ink"
+          aria-label="Glow Studio, strona główna"
         >
           Glow <span className="not-italic font-normal">Studio</span>
         </Link>
@@ -63,7 +66,7 @@ export function Navbar() {
             <li key={l.href}>
               <Link
                 href={l.href}
-                className="relative text-sm text-ink-soft transition-colors duration-300 ease-silk hover:text-ink after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-0 after:bg-champagne after:transition-all after:duration-300 after:ease-silk hover:after:w-full"
+                className="relative text-sm text-ink-soft transition-colors duration-300 ease-silk hover:text-ink after:absolute after:-bottom-1.5 after:left-0 after:h-px after:w-full after:origin-left after:scale-x-0 after:bg-champagne after:transition-transform after:duration-300 after:ease-silk hover:after:scale-x-100"
               >
                 {l.label}
               </Link>
@@ -109,7 +112,7 @@ export function Navbar() {
       {/* Panel mobilny */}
       <div
         id="mobile-menu"
-        className={`glass overflow-hidden border-t border-line/60 md:hidden ${
+        className={`overflow-hidden border-t border-line/60 bg-cream md:hidden ${
           open ? "max-h-[80vh]" : "max-h-0 border-transparent"
         } transition-[max-height] duration-500 ease-silk`}
       >
@@ -119,7 +122,7 @@ export function Navbar() {
               <Link
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className="block py-3 font-display text-2xl text-ink"
+                className="flex min-h-12 items-center font-display text-2xl font-light text-ink"
               >
                 {l.label}
               </Link>

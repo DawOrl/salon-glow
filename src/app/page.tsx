@@ -15,8 +15,8 @@ export default function Home() {
       <JsonLd data={salonJsonLd()} />
       <Hero />
       <Manifesto />
-      <Services />
       <BeforeAfter />
+      <Services />
       <Team />
       <Reviews />
       <BookingTeaser />

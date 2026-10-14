@@ -1,51 +1,48 @@
 import { Button } from "../ui/Button";
-import { Eyebrow } from "../ui/Eyebrow";
-import { Reveal } from "../ui/Reveal";
 import { Container } from "../ui/Container";
 import { Photo } from "../ui/Photo";
-import { HeroVideo } from "./HeroVideo";
 import { salonRating } from "@/data/reviews";
+import { salon } from "@/lib/salon";
 
 export function Hero() {
   return (
-    <section className="relative flex min-h-svh items-center overflow-hidden pt-24 pb-16 md:pt-28">
-      {/* Ambient — miękkie organiczne plamy */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -left-40 top-16 h-112 w-md rounded-full bg-sage/15 blur-3xl" />
-        <div className="absolute -right-32 bottom-0 h-112 w-md rounded-full bg-champagne/25 blur-3xl" />
-      </div>
-
+    <section className="relative pt-28 pb-16 md:pt-32 md:pb-24">
       <Container>
-        <div className="grid items-center gap-12 md:grid-cols-[1.05fr_0.95fr] lg:gap-16">
-          {/* Tekst */}
-          <div className="order-2 md:order-1">
-            <Reveal>
-              <Eyebrow>Salon fryzjerski &amp; koloryzacja · Warszawa</Eyebrow>
-            </Reveal>
+        <div className="grid items-end gap-12 md:grid-cols-12 md:gap-8 lg:gap-12">
+          {/* Tekst: na telefonie pierwszy, żeby nagłówek był nad zgięciem */}
+          <div className="md:col-span-7 md:pb-6">
+            <p className="flex items-baseline gap-3 text-sm text-muted">
+              <span className="font-display italic text-terracotta-ink">
+                Warszawa
+              </span>
+              <span aria-hidden className="h-px w-8 translate-y-[-0.3em] bg-champagne" />
+              <span>Salon fryzjerski i koloryzacja</span>
+            </p>
 
-            <h1 className="mt-7 font-display text-hero font-light leading-[0.9] text-ink">
+            <h1 className="mt-7 font-display text-hero font-light text-ink">
               Cisza,
               <br />
-              którą <em className="font-normal text-terracotta">widać</em>.
+              którą{" "}
+              <em className="font-normal text-terracotta">widać</em>.
             </h1>
 
             <p className="mt-8 max-w-md text-lg leading-relaxed text-ink-soft">
               Autorskie studio strzyżenia, balayage i regeneracji w sercu
-              Warszawy. Umów wizytę bezpośrednio u nas — bez pośredników,
-              bez prowizji.
+              Warszawy. Umów wizytę bezpośrednio u nas, bez pośredników
+              i bez prowizji.
             </p>
 
-            <div className="mt-10 flex flex-wrap items-center gap-4">
+            <div className="mt-9 flex flex-wrap items-center gap-3 sm:gap-4">
               <Button href="/rezerwacja" className="px-8 py-4">
                 Umów wizytę
               </Button>
-              <Button href="#uslugi" variant="outline" className="px-8 py-4">
+              <Button href="/#cennik" variant="outline" className="px-8 py-4">
                 Zobacz cennik
               </Button>
             </div>
 
-            <div className="mt-10 flex items-center gap-3 text-sm text-muted">
-              <span aria-hidden className="text-champagne">
+            <p className="mt-9 flex items-center gap-3 text-sm text-muted">
+              <span aria-hidden className="tracking-[0.12em] text-champagne">
                 ★★★★★
               </span>
               <span>
@@ -54,44 +51,29 @@ export function Hero() {
                 </span>{" "}
                 / 5 · {salonRating.total} opinii klientów
               </span>
-            </div>
+            </p>
           </div>
 
-          {/* Poster — edytorialny kadr w ramce */}
-          <Reveal className="order-1 md:order-2">
-            <figure className="relative">
-              <div className="relative aspect-4/5 w-full overflow-hidden rounded-card ring-1 ring-champagne/40">
-                <Photo
-                  src="/hero/poster.jpg"
-                  alt="Wnętrze salonu Glow Studio w naturalnym świetle"
-                  priority
-                  sizes="(min-width: 768px) 45vw, 100vw"
-                  className="object-cover kenburns"
-                />
-                <HeroVideo />
-                <div
-                  aria-hidden
-                  className="absolute inset-0 bg-linear-to-t from-ink/15 to-transparent"
-                />
-              </div>
-              {/* Pływający detal — sygnał premium */}
-              <figcaption className="absolute -bottom-5 -left-5 hidden rounded-card glass px-5 py-4 ring-1 ring-line md:block">
-                <p className="font-display text-xl italic text-ink">est. 2014</p>
-                <p className="text-xs uppercase tracking-[0.18em] text-muted">
-                  Mokotowska · Warszawa
-                </p>
-              </figcaption>
-            </figure>
-          </Reveal>
+          {/* Zdjęcie w łuku okna kamienicy */}
+          <figure className="md:col-span-5">
+            <div className="arch relative aspect-4/5 w-full overflow-hidden bg-sand">
+              <Photo
+                src="/hero/salon.webp"
+                alt="Stanowisko w Glow Studio: skórzany fotel przed okrągłym lustrem w mosiężnej ramie, dębowa konsola, lniane zasłony i jodełka w jasnym wnętrzu kamienicy."
+                priority
+                sizes="(min-width: 1152px) 470px, (min-width: 768px) 40vw, 100vw"
+                className="settle object-cover"
+              />
+            </div>
+            <figcaption className="mt-4 flex items-baseline justify-between gap-4 text-sm text-muted">
+              <span className="font-display italic text-ink-soft">est. 2014</span>
+              <span>
+                {salon.address.street}, {salon.address.city}
+              </span>
+            </figcaption>
+          </figure>
         </div>
       </Container>
-
-      <span
-        aria-hidden
-        className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 text-eyebrow uppercase tracking-[0.18em] text-muted lg:block"
-      >
-        przewiń
-      </span>
     </section>
   );
 }

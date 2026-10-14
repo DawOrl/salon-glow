@@ -48,7 +48,7 @@ export const reservationSchema = z
         });
       }
     }
-    // Termin musi być w przyszłości (walidacja serwerowa — klient i tak pokazuje
+    // Termin musi być w przyszłości (walidacja serwerowa: klient i tak pokazuje
     // tylko przyszłe sloty, ale Server Action jest osiągalna bezpośrednim POST-em).
     const when = new Date(`${d.date}T${d.time}:00`);
     if (!Number.isNaN(when.getTime()) && when.getTime() <= Date.now()) {

@@ -9,7 +9,7 @@ import { SITE_URL } from "@/lib/site";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Glow Studio — fryzjer i koloryzacja w Warszawie",
+    default: "Glow Studio · fryzjer i koloryzacja w Warszawie",
     template: "%s | Glow Studio",
   },
   description: salon.description,
@@ -25,12 +25,12 @@ export const metadata: Metadata = {
     type: "website",
     locale: "pl_PL",
     siteName: "Glow Studio",
-    title: "Glow Studio — fryzjer i koloryzacja w Warszawie",
+    title: "Glow Studio · fryzjer i koloryzacja w Warszawie",
     description: salon.description,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Glow Studio — fryzjer i koloryzacja w Warszawie",
+    title: "Glow Studio · fryzjer i koloryzacja w Warszawie",
     description: salon.description,
   },
   robots: { index: true, follow: true },

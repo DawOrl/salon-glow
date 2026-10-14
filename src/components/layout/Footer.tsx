@@ -3,11 +3,11 @@ import { Container } from "../ui/Container";
 import { salon } from "@/lib/salon";
 
 const navLinks = [
-  { href: "#uslugi", label: "Usługi" },
-  { href: "#metamorfozy", label: "Metamorfozy" },
-  { href: "#zespol", label: "Zespół" },
-  { href: "#opinie", label: "Opinie" },
-  { href: "/rezerwacja", label: "Rezerwacja" },
+  { href: "/#metamorfozy", label: "Metamorfozy" },
+  { href: "/#cennik", label: "Cennik" },
+  { href: "/uslugi", label: "Wszystkie usługi" },
+  { href: "/#zespol", label: "Zespół" },
+  { href: "/rezerwacja", label: "Rezerwacja online" },
 ];
 
 export function Footer() {
@@ -25,11 +25,11 @@ export function Footer() {
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted">
               {salon.description}
             </p>
-            <div className="mt-6 flex gap-4 text-sm">
+            <div className="mt-4 flex gap-5 text-sm">
               {salon.socials.instagram && (
                 <Link
                   href={salon.socials.instagram}
-                  className="text-ink-soft transition-colors hover:text-terracotta"
+                  className="inline-flex min-h-11 items-center text-ink-soft transition-colors hover:text-terracotta-ink"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -39,7 +39,7 @@ export function Footer() {
               {salon.socials.facebook && (
                 <Link
                   href={salon.socials.facebook}
-                  className="text-ink-soft transition-colors hover:text-terracotta"
+                  className="inline-flex min-h-11 items-center text-ink-soft transition-colors hover:text-terracotta-ink"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -49,7 +49,7 @@ export function Footer() {
               {salon.socials.tiktok && (
                 <Link
                   href={salon.socials.tiktok}
-                  className="text-ink-soft transition-colors hover:text-terracotta"
+                  className="inline-flex min-h-11 items-center text-ink-soft transition-colors hover:text-terracotta-ink"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -61,15 +61,15 @@ export function Footer() {
 
           {/* Nawigacja */}
           <nav aria-label="Stopka">
-            <h2 className="text-eyebrow font-medium uppercase tracking-[0.18em] text-muted">
+            <h2 className="font-display text-base italic text-ink">
               Nawigacja
             </h2>
-            <ul className="mt-4 space-y-2.5">
+            <ul className="mt-2">
               {navLinks.map((l) => (
                 <li key={l.href}>
                   <Link
                     href={l.href}
-                    className="text-sm text-ink-soft transition-colors hover:text-ink"
+                    className="inline-flex min-h-11 items-center text-sm text-ink-soft transition-colors hover:text-ink"
                   >
                     {l.label}
                   </Link>
@@ -80,10 +80,10 @@ export function Footer() {
 
           {/* Kontakt + godziny */}
           <div>
-            <h2 className="text-eyebrow font-medium uppercase tracking-[0.18em] text-muted">
+            <h2 className="font-display text-base italic text-ink">
               Kontakt
             </h2>
-            <address className="mt-4 space-y-2.5 text-sm not-italic text-ink-soft">
+            <address className="mt-4 space-y-1 text-sm not-italic text-ink-soft">
               <p>
                 {salon.address.street}
                 <br />
@@ -92,7 +92,7 @@ export function Footer() {
               <p>
                 <Link
                   href={`tel:${salon.phoneHref}`}
-                  className="transition-colors hover:text-terracotta"
+                  className="inline-flex min-h-11 items-center transition-colors hover:text-terracotta-ink"
                 >
                   {salon.phone}
                 </Link>
@@ -100,7 +100,7 @@ export function Footer() {
               <p>
                 <Link
                   href={`mailto:${salon.email}`}
-                  className="transition-colors hover:text-terracotta"
+                  className="inline-flex min-h-11 items-center transition-colors hover:text-terracotta-ink"
                 >
                   {salon.email}
                 </Link>
@@ -123,9 +123,9 @@ export function Footer() {
           <p>
             © {year} {salon.legalName ?? salon.name}. Wszelkie prawa zastrzeżone.
           </p>
-          <p>
-            Twoja rezerwacja, Twoi klienci, Twoje dane —{" "}
-            <span className="text-ink-soft">0% prowizji platform.</span>
+          <p className="max-w-md md:text-right">
+            Projekt demonstracyjny: salon, zespół, opinie i zdjęcia są fikcyjne
+            (zdjęcia wygenerowane na potrzeby prezentacji).
           </p>
         </div>
       </Container>
