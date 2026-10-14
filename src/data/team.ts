@@ -1,8 +1,8 @@
 import type { StaffMember } from "@/lib/types";
 
 /**
- * Zespół Glow Studio. Zdjęcia: placeholdery w /public/team (palette-matched).
- * Przy realnej sesji — podmiana na statyczny import dla blurDataURL.
+ * Zespół Glow Studio (dane demo). Portrety z jednej serii: ta sama ściana,
+ * światło okna i ziarno filmu, żeby zespół wyglądał jak z jednej sesji.
  */
 export const team: StaffMember[] = [
   {
@@ -12,7 +12,7 @@ export const team: StaffMember[] = [
     role: "Art Director · Senior Colorist",
     specialties: ["Balayage", "Korekta koloru", "Strzyżenie autorskie"],
     bio: "Założycielka studia. 14 lat przy fotelu, edukatorka koloryzacji. Specjalizuje się w naturalnych, wtopionych przejściach i metamorfozach koloru.",
-    photo: "/team/maja.jpg",
+    photo: "/team/maja.webp",
     rating: 5.0,
     reviewCount: 214,
     instagram: "https://instagram.com/maja.glowstudio",
@@ -26,7 +26,7 @@ export const team: StaffMember[] = [
     role: "Master Barber & Stylista",
     specialties: ["Strzyżenie męskie", "Strzyżenie damskie", "Brzytwa"],
     bio: "Precyzja i klasyczne rzemiosło barberskie połączone z nowoczesnym strzyżeniem. Wierzy, że dobra fryzura zaczyna się od dobrej konsultacji.",
-    photo: "/team/kris.jpg",
+    photo: "/team/kris.webp",
     rating: 4.9,
     reviewCount: 168,
     instagram: "https://instagram.com/kris.glowstudio",
@@ -40,7 +40,7 @@ export const team: StaffMember[] = [
     role: "Stylistka & Kolorystka",
     specialties: ["Koloryzacja", "Stylizacje okazjonalne", "Fale"],
     bio: "Łączy koloryzację ze stylizacją okazjonalną. Uwielbia projekty ślubne i delikatne rozświetlenia twarzy.",
-    photo: "/team/natalia.jpg",
+    photo: "/team/natalia.webp",
     rating: 4.9,
     reviewCount: 142,
     instagram: "https://instagram.com/natalia.glowstudio",
@@ -54,7 +54,7 @@ export const team: StaffMember[] = [
     role: "Specjalistka pielęgnacji",
     specialties: ["Keratyna", "Nanoplastia", "Regeneracja"],
     bio: "Trycholożka z pasją do zdrowego włosa. Dobiera zabiegi regenerujące, które realnie odbudowują strukturę po koloryzacji.",
-    photo: "/team/ola.jpg",
+    photo: "/team/ola.webp",
     rating: 5.0,
     reviewCount: 97,
     instagram: "https://instagram.com/ola.glowstudio",

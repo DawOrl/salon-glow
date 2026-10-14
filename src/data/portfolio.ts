@@ -1,9 +1,10 @@
 import type { Transformation } from "@/lib/types";
 
 /**
- * Metamorfozy „przed/po” — bohater sekcji galerii (slider w BeforeAfter).
- * Obrazy realne (Pexels). Wariant „przed” jest symulowany z tego samego zdjęcia
- * (przygaszony, chłodniejszy), więc opowiadają historię koloru i blasku.
+ * Metamorfozy „przed/po”: bohater sekcji galerii (suwak w BeforeAfter).
+ * Zdjęcia demo wygenerowane jedną serią (fal.ai, nano-banana-2): „po” powstało
+ * edycją zdjęcia „przed”, więc to ta sama osoba, kadr, ubranie i światło,
+ * a zmieniają się wyłącznie włosy. Zob. scripts/optimize-media.mjs.
  */
 export const transformations: Transformation[] = [
   {
@@ -14,9 +15,9 @@ export const transformations: Transformation[] = [
     staffId: "maja",
     staffName: "Maja Kowalczyk",
     durationMin: 195,
-    beforeImage: "/portfolio/tr-1-before.jpg",
-    afterImage: "/portfolio/tr-1-after.jpg",
-    alt: "Metamorfoza koloru: z przygaszonej bazy do ciepłego, rozświetlonego balayage.",
+    beforeImage: "/portfolio/tr-1-before.webp",
+    afterImage: "/portfolio/tr-1-after.webp",
+    alt: "Kobieta ujęta od tyłu przy oknie: jednolity, matowy ciemny brąz zamieniony w ciepły, miodowo-karmelowy balayage.",
     tags: ["balayage", "rozświetlenie", "ciepły blond"],
     featured: true,
   },
@@ -28,9 +29,9 @@ export const transformations: Transformation[] = [
     staffId: "maja",
     staffName: "Maja Kowalczyk",
     durationMin: 180,
-    beforeImage: "/portfolio/tr-2-before.jpg",
-    afterImage: "/portfolio/tr-2-after.jpg",
-    alt: "Miękkie, miedziane sombre z rozświetleniem na długości i końcach.",
+    beforeImage: "/portfolio/tr-2-before.webp",
+    afterImage: "/portfolio/tr-2-after.webp",
+    alt: "Klientka od tyłu: wyblakły, przesuszony popielaty brąz przechodzi w miękkie miedziane sombre na falach.",
     tags: ["sombre", "miedź", "naturalne przejście"],
     featured: true,
   },
@@ -42,9 +43,9 @@ export const transformations: Transformation[] = [
     staffId: "natalia",
     staffName: "Natalia Wiśniewska",
     durationMin: 135,
-    beforeImage: "/portfolio/tr-3-before.jpg",
-    afterImage: "/portfolio/tr-3-after.jpg",
-    alt: "Wyrównany, ciepły brąz i sprężyste, lśniące fale.",
+    beforeImage: "/portfolio/tr-3-before.webp",
+    afterImage: "/portfolio/tr-3-after.webp",
+    alt: "Profil klientki: żółtawe, nierówne pasemka z odrostem wyrównane do głębokiego, ciepłego brązu w miękkich falach.",
     tags: ["koloryzacja", "brąz", "fale"],
     featured: true,
   },
@@ -56,9 +57,9 @@ export const transformations: Transformation[] = [
     staffId: "ola",
     staffName: "Aleksandra Dąbrowska",
     durationMin: 45,
-    beforeImage: "/portfolio/tr-4-before.jpg",
-    afterImage: "/portfolio/tr-4-after.jpg",
-    alt: "Z matowych, zmęczonych włosów do gładkich pasm z lustrzanym blaskiem.",
+    beforeImage: "/portfolio/tr-4-before.webp",
+    afterImage: "/portfolio/tr-4-after.webp",
+    alt: "Długie, jasnobrązowe włosy od tyłu: puszące się i matowe przed zabiegiem, gładkie i lśniące po regeneracji.",
     tags: ["regeneracja", "blask", "odbudowa"],
   },
   {
@@ -69,9 +70,9 @@ export const transformations: Transformation[] = [
     staffId: "maja",
     staffName: "Maja Kowalczyk",
     durationMin: 195,
-    beforeImage: "/portfolio/tr-5-before.jpg",
-    afterImage: "/portfolio/tr-5-after.jpg",
-    alt: "Głęboki karmelowy balayage z rozświetleniem twarzy.",
+    beforeImage: "/portfolio/tr-5-before.webp",
+    afterImage: "/portfolio/tr-5-after.webp",
+    alt: "Klientka w fotelu: płaski, mysi ciemny blond zamieniony w karmelowy balayage z jaśniejszą oprawą twarzy.",
     tags: ["balayage", "karmel", "rozświetlenie twarzy"],
   },
   {
@@ -82,9 +83,9 @@ export const transformations: Transformation[] = [
     staffId: "natalia",
     staffName: "Natalia Wiśniewska",
     durationMin: 180,
-    beforeImage: "/portfolio/tr-6-before.jpg",
-    afterImage: "/portfolio/tr-6-after.jpg",
-    alt: "Naturalne sombre wykończone miękkimi, glamour falami.",
+    beforeImage: "/portfolio/tr-6-before.webp",
+    afterImage: "/portfolio/tr-6-after.webp",
+    alt: "Kobieta przy oknie: proste, jednolite czekoladowe włosy zamienione w sombre ułożone w eleganckie fale.",
     tags: ["sombre", "glamour", "fale"],
   },
 ];
