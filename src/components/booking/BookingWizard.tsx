@@ -1,25 +1,99 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from "react";
+import Image from "next/image";
 import { createReservation, type BookingState } from "@/app/lib/actions";
 import { serviceCategories, services } from "@/data/services";
 import { getServiceById, getStaffForService } from "@/lib/queries";
 import { formatDuration, formatPrice } from "@/lib/format";
 import { salon } from "@/lib/salon";
 import { getAvailableDays, getSlotsForDay, type DayOption } from "@/lib/slots";
-import type { TimeSlot } from "@/lib/types";
-import { ProgressBar } from "./ProgressBar";
+import { imageMeta } from "@/lib/imageMeta";
+import type { StaffMember, TimeSlot } from "@/lib/types";
+import { ProgressBar, STEPS } from "./ProgressBar";
 import { SubmitButton } from "./SubmitButton";
 
 const inputBase =
-  "w-full rounded-xl border bg-cream px-4 py-3 text-ink placeholder:text-muted/70 transition-colors duration-300 ease-silk focus:outline-none focus:ring-1";
+  "w-full rounded-xl border bg-cream px-4 py-3 text-base text-ink placeholder:text-muted/70 transition-colors duration-300 ease-silk focus:outline-none focus:ring-1";
 
 function fieldClass(hasError: boolean) {
   return `${inputBase} ${
     hasError
-      ? "border-terracotta focus:border-terracotta focus:ring-terracotta"
+      ? "border-terracotta-deep focus:border-terracotta-deep focus:ring-terracotta-deep"
       : "border-line focus:border-terracotta focus:ring-terracotta"
   }`;
+}
+
+/** Wiersz-wybór oparty o natywny radio (strzałki, Tab, czytniki ekranu). */
+const optionBase =
+  "relative flex cursor-pointer items-center gap-4 rounded-2xl border px-4 py-3.5 transition-[border-color,background-color] duration-200 ease-silk has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-terracotta";
+const optionState = (on: boolean) =>
+  on ? "border-terracotta bg-sand/60" : "border-line bg-cream hover:border-ink/25";
+
+function Radio({ on }: { on: boolean }) {
+  return (
+    <span
+      aria-hidden
+      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-colors ${
+        on ? "border-terracotta-deep" : "border-ink/25"
+      }`}
+    >
+      <span
+        className={`h-2.5 w-2.5 rounded-full bg-terracotta-deep transition-transform duration-200 ease-silk ${
+          on ? "scale-100" : "scale-0"
+        }`}
+      />
+    </span>
+  );
+}
+
+function Avatar({ person, size = 48 }: { person: StaffMember; size?: number }) {
+  const meta = imageMeta[person.photo];
+  return (
+    <span
+      className="relative block shrink-0 overflow-hidden rounded-xl bg-sand"
+      style={{ width: size, height: size * 1.15 }}
+    >
+      <Image
+        src={person.photo}
+        alt=""
+        fill
+        sizes={`${size}px`}
+        placeholder={meta ? "blur" : "empty"}
+        blurDataURL={meta?.blurDataURL}
+        className="object-cover object-top"
+      />
+    </span>
+  );
+}
+
+const periodOf = (time: string) => {
+  const h = Number(time.slice(0, 2));
+  if (h < 12) return "Rano";
+  if (h < 16) return "Po południu";
+  return "Wieczorem";
+};
+
+/** Walidacja po stronie klienta (te same reguły co zod na serwerze). */
+function validateClient(fd: FormData) {
+  const e: Record<string, string> = {};
+  const name = String(fd.get("name") ?? "").trim();
+  const phone = String(fd.get("phone") ?? "").trim();
+  const email = String(fd.get("email") ?? "").trim();
+  if (name.length < 2) e.name = "Podaj imię i nazwisko";
+  if (!phone && !email) e.phone = "Podaj telefon lub e-mail";
+  if (phone && !/^[+0-9 ()\-]{7,}$/.test(phone)) e.phone = "Podaj poprawny numer telefonu";
+  if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) e.email = "Podaj poprawny adres e-mail";
+  if (String(fd.get("notes") ?? "").length > 500) e.notes = "Maksymalnie 500 znaków";
+  if (!fd.get("consent")) e.consent = "Potrzebujemy Twojej zgody, aby potwierdzić wizytę";
+  return e;
 }
 
 export function BookingWizard({
@@ -36,250 +110,359 @@ export function BookingWizard({
     initialService?.id ?? null,
   );
   const [staffId, setStaffId] = useState<string>("any");
-  const [date, setDate] = useState<string | null>(null);
+
+  // Leniwa inicjalizacja: /rezerwacja jest dynamiczna (SSR na żądanie),
+  // więc dzień po stronie serwera i klienta jest ten sam (brak hydration mismatch).
+  const [days] = useState<DayOption[]>(() =>
+    getAvailableDays(new Date(), 12, salon.openingHours),
+  );
+  const [date, setDate] = useState<string | null>(days[0]?.iso ?? null);
   const [time, setTime] = useState<string | null>(null);
   const [stepError, setStepError] = useState<string | null>(null);
-
-  // Leniwa inicjalizacja — strona /rezerwacja jest dynamiczna (SSR na żądanie),
-  // więc dzień po stronie serwera i klienta jest ten sam → brak hydration mismatch.
-  const [days] = useState<DayOption[]>(() =>
-    getAvailableDays(new Date(), 10, salon.openingHours),
-  );
-
-  const slots: TimeSlot[] = useMemo(
-    () => (date ? getSlotsForDay(date, salon.openingHours) : []),
-    [date],
-  );
+  const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
 
   const service = serviceId ? getServiceById(serviceId) : undefined;
   const eligibleStaff = service ? getStaffForService(service) : [];
+  const staff = eligibleStaff.find((p) => p.id === staffId);
+
+  const duration = service?.durationMin ?? 60;
+  const slots: TimeSlot[] = date
+    ? getSlotsForDay(date, salon.openingHours, duration, staffId)
+    : [];
+  const freeCount = slots.filter((s) => s.available).length;
 
   const [state, formAction] = useActionState<BookingState, FormData>(
     createReservation,
     { ok: false },
   );
-  const errors = state.errors ?? {};
+  const errors = { ...(state.errors ?? {}), ...clientErrors };
 
-  // Po zmianie kroku przenosimy fokus na nagłówek kroku — czytnik ekranu ogłasza
-  // nową treść, a użytkownik klawiatury nie traci kontekstu (WCAG 2.4.3 / 4.1.3).
-  const contentRef = useRef<HTMLDivElement>(null);
+  // Po zmianie kroku: fokus na nagłówek kroku (czytnik ogłasza nową treść,
+  // klawiatura nie gubi kontekstu) i powrót na górę kreatora, jeśli uciekł.
+  const topRef = useRef<HTMLDivElement>(null);
   const firstRender = useRef(true);
   useEffect(() => {
     if (firstRender.current) {
       firstRender.current = false;
       return;
     }
-    contentRef.current
+    topRef.current
       ?.querySelector<HTMLElement>("[data-step-heading]")
-      ?.focus();
+      ?.focus({ preventScroll: true });
+    const top = topRef.current?.getBoundingClientRect().top ?? 0;
+    if (top < 80) {
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      topRef.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    }
   }, [step]);
 
-  function next() {
-    setStepError(null);
-    if (step === 1 && !serviceId) {
-      setStepError("Wybierz usługę, aby przejść dalej.");
-      return;
-    }
-    if (step === 3 && (!date || !time)) {
-      setStepError("Wybierz dzień i godzinę wizyty.");
-      return;
-    }
-    setStep((s) => Math.min(4, s + 1));
+  function canLeave(s: number) {
+    if (s === 1 && !serviceId) return "Wybierz usługę, aby przejść dalej.";
+    if (s === 3 && (!date || !time)) return "Wybierz dzień i godzinę wizyty.";
+    return null;
   }
-  function back() {
+
+  function goTo(target: number) {
     setStepError(null);
-    setStep((s) => Math.max(1, s - 1));
+    if (target > step) {
+      for (let s = step; s < target; s++) {
+        const err = canLeave(s);
+        if (err) {
+          setStepError(err);
+          return;
+        }
+      }
+    }
+    setStep(Math.max(1, Math.min(4, target)));
+  }
+
+  function onSubmit(e: FormEvent<HTMLFormElement>) {
+    const found = validateClient(new FormData(e.currentTarget));
+    setClientErrors(found);
+    if (Object.keys(found).length) {
+      e.preventDefault();
+      const first = Object.keys(found)[0];
+      e.currentTarget.querySelector<HTMLElement>(`[name="${first}"]`)?.focus();
+    }
   }
 
   const selectedDay = days.find((d) => d.iso === date);
+  const termLabel =
+    selectedDay && time ? `${selectedDay.weekday} ${selectedDay.label}, ${time}` : null;
+
+  const summaryRows: { label: string; value: ReactNode; step: number }[] = [
+    { label: "Usługa", value: service?.name, step: 1 },
+    { label: "Stylista", value: staffId === "any" ? "Pierwszy wolny" : staff?.name, step: 2 },
+    { label: "Termin", value: termLabel, step: 3 },
+  ];
+
+  const heading = (text: string, sub?: string) => (
+    <div className="mb-6">
+      <h2
+        tabIndex={-1}
+        data-step-heading
+        className="scroll-mt-28 font-display text-title font-light text-ink outline-none"
+      >
+        {text}
+      </h2>
+      {sub && <p className="mt-2 text-sm text-muted">{sub}</p>}
+    </div>
+  );
+
+  const periods = ["Rano", "Po południu", "Wieczorem"]
+    .map((p) => ({ p, list: slots.filter((s) => periodOf(s.time) === p) }))
+    .filter((g) => g.list.length > 0);
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[1.4fr_0.6fr]">
-      <div>
-        <ProgressBar current={step} />
+    <div ref={topRef} className="scroll-mt-24 grid gap-10 lg:grid-cols-12 lg:gap-12">
+      <div className="min-w-0 lg:col-span-8">
+        <ProgressBar current={step} onStep={goTo} />
 
-        <div ref={contentRef} className="mt-10">
-          {/* KROK 1 — Usługa */}
+        <div className="mt-10">
+          {/* KROK 1: usługa */}
           {step === 1 && (
-            <fieldset>
-              <legend
-                tabIndex={-1}
-                data-step-heading
-                className="font-display text-2xl text-ink outline-none"
-              >
-                Wybierz usługę
-              </legend>
-              <div className="mt-6 space-y-8">
+            <section>
+              {heading(
+                "Wybierz usługę",
+                "Ceny „od”: finalną potwierdzimy po krótkiej konsultacji.",
+              )}
+              <div className="space-y-9">
                 {serviceCategories.map((cat) => (
-                  <div key={cat.id}>
-                    <h3 className="text-xs uppercase tracking-[0.16em] text-muted">
+                  <fieldset key={cat.id}>
+                    <legend className="font-display text-lg italic text-ink-soft">
                       {cat.name}
-                    </h3>
-                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    </legend>
+                    <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
                       {services
                         .filter((s) => s.categoryId === cat.id)
                         .map((s) => {
-                          const selected = s.id === serviceId;
+                          const on = s.id === serviceId;
                           return (
-                            <button
-                              key={s.id}
-                              type="button"
-                              aria-pressed={selected}
-                              onClick={() => {
-                                setServiceId(s.id);
-                                setStaffId("any");
-                              }}
-                              className={`rounded-card border p-4 text-left transition-colors duration-300 ease-silk ${
-                                selected
-                                  ? "border-terracotta bg-sand/50"
-                                  : "border-line bg-cream hover:border-champagne"
-                              }`}
-                            >
-                              <span className="flex items-center justify-between gap-3">
-                                <span className="font-medium text-ink">
-                                  {s.name}
-                                </span>
-                                <span className="shrink-0 text-sm tabular-nums text-terracotta">
-                                  {formatPrice(s)}
+                            <label key={s.id} className={`${optionBase} ${optionState(on)}`}>
+                              <input
+                                type="radio"
+                                name="pick-service"
+                                value={s.id}
+                                checked={on}
+                                onChange={() => {
+                                  setServiceId(s.id);
+                                  setStaffId("any");
+                                  setTime(null);
+                                  setStepError(null);
+                                }}
+                                className="sr-only"
+                              />
+                              <Radio on={on} />
+                              <span className="min-w-0 flex-1">
+                                <span className="block font-medium text-ink">{s.name}</span>
+                                <span className="mt-0.5 block text-sm text-muted">
+                                  {formatDuration(s.durationMin)}
                                 </span>
                               </span>
-                              <span className="mt-1 block text-xs text-muted">
-                                {formatDuration(s.durationMin)}
+                              <span className="shrink-0 font-display tabular-nums text-ink">
+                                {formatPrice(s)}
                               </span>
-                            </button>
+                            </label>
                           );
                         })}
                     </div>
-                  </div>
+                  </fieldset>
                 ))}
               </div>
-            </fieldset>
+            </section>
           )}
 
-          {/* KROK 2 — Stylista */}
+          {/* KROK 2: stylista */}
           {step === 2 && (
-            <fieldset>
-              <legend
-                tabIndex={-1}
-                data-step-heading
-                className="font-display text-2xl text-ink outline-none"
-              >
-                Wybierz stylistę
-              </legend>
-              <p className="mt-2 text-sm text-muted">
-                Możesz zostawić wybór nam — przydzielimy pierwszego wolnego.
-              </p>
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                <button
-                  type="button"
-                  aria-pressed={staffId === "any"}
-                  onClick={() => setStaffId("any")}
-                  className={`rounded-card border p-4 text-left transition-colors duration-300 ease-silk ${
-                    staffId === "any"
-                      ? "border-terracotta bg-sand/50"
-                      : "border-line bg-cream hover:border-champagne"
-                  }`}
-                >
-                  <span className="font-medium text-ink">Pierwszy wolny</span>
-                  <span className="mt-1 block text-xs text-muted">
-                    Najszybszy dostępny termin
-                  </span>
-                </button>
-                {eligibleStaff.map((person) => (
-                  <button
-                    key={person.id}
-                    type="button"
-                    aria-pressed={staffId === person.id}
-                    onClick={() => setStaffId(person.id)}
-                    className={`rounded-card border p-4 text-left transition-colors duration-300 ease-silk ${
-                      staffId === person.id
-                        ? "border-terracotta bg-sand/50"
-                        : "border-line bg-cream hover:border-champagne"
-                    }`}
-                  >
-                    <span className="font-medium text-ink">{person.name}</span>
-                    <span className="mt-1 block text-xs text-muted">
-                      {person.role}
+            <section>
+              {heading(
+                "Wybierz stylistę",
+                "Możesz zostawić wybór nam. Przydzielimy osobę z najbliższym wolnym terminem.",
+              )}
+              <fieldset>
+                <legend className="sr-only">Stylista</legend>
+                <div className="grid gap-2.5 sm:grid-cols-2">
+                  <label className={`${optionBase} ${optionState(staffId === "any")}`}>
+                    <input
+                      type="radio"
+                      name="pick-staff"
+                      value="any"
+                      checked={staffId === "any"}
+                      onChange={() => {
+                        setStaffId("any");
+                        setTime(null);
+                      }}
+                      className="sr-only"
+                    />
+                    <Radio on={staffId === "any"} />
+                    <span className="flex -space-x-3">
+                      {eligibleStaff.slice(0, 3).map((p) => (
+                        <span key={p.id} className="rounded-xl ring-2 ring-cream">
+                          <Avatar person={p} size={34} />
+                        </span>
+                      ))}
                     </span>
-                  </button>
-                ))}
-              </div>
-            </fieldset>
+                    <span className="min-w-0">
+                      <span className="block font-medium text-ink">Pierwszy wolny</span>
+                      <span className="mt-0.5 block text-sm text-muted">
+                        Najwięcej wolnych godzin
+                      </span>
+                    </span>
+                  </label>
+                  {eligibleStaff.map((person) => {
+                    const on = staffId === person.id;
+                    return (
+                      <label key={person.id} className={`${optionBase} ${optionState(on)}`}>
+                        <input
+                          type="radio"
+                          name="pick-staff"
+                          value={person.id}
+                          checked={on}
+                          onChange={() => {
+                            setStaffId(person.id);
+                            setTime(null);
+                          }}
+                          className="sr-only"
+                        />
+                        <Radio on={on} />
+                        <Avatar person={person} />
+                        <span className="min-w-0">
+                          <span className="block font-medium text-ink">{person.name}</span>
+                          <span className="mt-0.5 block text-sm text-muted">{person.role}</span>
+                          {person.rating && (
+                            <span className="mt-0.5 block text-xs text-muted">
+                              <span aria-hidden className="text-champagne">★</span>{" "}
+                              {person.rating.toLocaleString("pl-PL", { minimumFractionDigits: 1 })}
+                            </span>
+                          )}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </fieldset>
+            </section>
           )}
 
-          {/* KROK 3 — Termin */}
+          {/* KROK 3: termin */}
           {step === 3 && (
-            <fieldset>
-              <legend
-                tabIndex={-1}
-                data-step-heading
-                className="font-display text-2xl text-ink outline-none"
-              >
-                Wybierz termin
-              </legend>
-              <p className="mt-2 text-sm text-muted">Dzień</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {days.map((d) => (
-                  <button
-                    key={d.iso}
-                    type="button"
-                    aria-pressed={date === d.iso}
-                    onClick={() => {
-                      setDate(d.iso);
-                      setTime(null);
-                    }}
-                    className={`rounded-xl border px-4 py-2.5 text-center transition-colors duration-300 ease-silk ${
-                      date === d.iso
-                        ? "border-terracotta bg-sand/50"
-                        : "border-line bg-cream hover:border-champagne"
-                    }`}
-                  >
-                    <span className="block text-xs uppercase text-muted">
-                      {d.weekday}
-                    </span>
-                    <span className="block text-sm text-ink">{d.label}</span>
-                  </button>
-                ))}
-              </div>
-
-              {date && (
-                <>
-                  <p className="mt-6 text-sm text-muted">Godzina</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {slots.map((slot) => (
-                      <button
-                        key={slot.time}
-                        type="button"
-                        disabled={!slot.available}
-                        aria-pressed={time === slot.time}
-                        onClick={() => setTime(slot.time)}
-                        className={`rounded-xl border px-5 py-2.5 text-sm tabular-nums transition-colors duration-300 ease-silk ${
-                          !slot.available
-                            ? "cursor-not-allowed border-line bg-sand/40 text-muted/50 line-through"
-                            : time === slot.time
-                              ? "border-terracotta bg-sand/50 text-ink"
-                              : "border-line bg-cream text-ink hover:border-champagne"
+            <section>
+              {heading(
+                "Wybierz termin",
+                service
+                  ? `Wizyta trwa ok. ${formatDuration(service.durationMin)}. Pokazujemy godziny, w których zmieści się przed zamknięciem.`
+                  : undefined,
+              )}
+              <fieldset>
+                <legend className="text-sm text-muted">Dzień</legend>
+                <div className="no-scrollbar -mx-6 mt-3 flex snap-x gap-2 overflow-x-auto px-6 pb-1 lg:mx-0 lg:flex-wrap lg:px-0">
+                  {days.map((d) => {
+                    const on = date === d.iso;
+                    return (
+                      <label
+                        key={d.iso}
+                        className={`flex w-16 shrink-0 cursor-pointer snap-start flex-col items-center rounded-2xl border py-3 transition-colors duration-200 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-terracotta ${
+                          on
+                            ? "border-ink bg-ink text-cream"
+                            : "border-line bg-cream text-ink hover:border-ink/30"
                         }`}
                       >
-                        {slot.time}
-                      </button>
-                    ))}
+                        <input
+                          type="radio"
+                          name="pick-day"
+                          value={d.iso}
+                          checked={on}
+                          onChange={() => {
+                            setDate(d.iso);
+                            setTime(null);
+                          }}
+                          className="sr-only"
+                        />
+                        <span className={`text-xs ${on ? "text-cream/75" : "text-muted"}`}>
+                          {d.weekday}
+                        </span>
+                        <span className="font-display text-2xl leading-tight tabular-nums">
+                          {d.day}
+                        </span>
+                        <span className={`text-xs ${on ? "text-cream/75" : "text-muted"}`}>
+                          {d.month}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </fieldset>
+
+              <fieldset className="mt-8">
+                <legend className="text-sm text-muted">
+                  Godzina
+                  {date && (
+                    <span className="text-ink-soft">
+                      {" "}
+                      · {freeCount} {freeCount === 1 ? "wolna" : "wolnych"}
+                    </span>
+                  )}
+                </legend>
+                {date && freeCount === 0 && (
+                  <p className="mt-3 rounded-2xl border border-line bg-sand/40 px-4 py-4 text-sm text-ink-soft">
+                    Tego dnia nie mamy już wolnych godzin dla tej usługi. Wybierz inny
+                    dzień albo zadzwoń:{" "}
+                    <a className="underline underline-offset-4" href={`tel:${salon.phoneHref}`}>
+                      {salon.phone}
+                    </a>
+                    .
+                  </p>
+                )}
+                {periods.map(({ p, list }) => (
+                  <div key={p} className="mt-4">
+                    <p className="font-display text-sm italic text-ink-soft">{p}</p>
+                    <div className="mt-2 grid grid-cols-4 gap-2 sm:grid-cols-6">
+                      {list.map((slot) => {
+                        const on = time === slot.time;
+                        return (
+                          <label
+                            key={slot.time}
+                            className={`flex min-h-11 items-center justify-center rounded-xl border text-sm tabular-nums transition-colors duration-200 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-terracotta ${
+                              !slot.available
+                                ? "cursor-not-allowed border-transparent bg-sand/40 text-muted line-through decoration-muted/60"
+                                : on
+                                  ? "cursor-pointer border-terracotta-deep bg-terracotta-deep text-cream"
+                                  : "cursor-pointer border-line bg-cream text-ink hover:border-ink/30"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="pick-time"
+                              value={slot.time}
+                              checked={on}
+                              disabled={!slot.available}
+                              onChange={() => {
+                                setTime(slot.time);
+                                setStepError(null);
+                              }}
+                              className="sr-only"
+                              aria-label={`${slot.time}${slot.available ? "" : ", zajęte"}`}
+                            />
+                            {slot.time}
+                          </label>
+                        );
+                      })}
+                    </div>
                   </div>
-                </>
-              )}
-            </fieldset>
+                ))}
+              </fieldset>
+            </section>
           )}
 
-          {/* KROK 4 — Dane + wysyłka */}
+          {/* KROK 4: dane i wysyłka */}
           {step === 4 && (
-            <form action={formAction} noValidate>
-              <h2
-                tabIndex={-1}
-                data-step-heading
-                className="font-display text-2xl text-ink outline-none"
-              >
-                Twoje dane
-              </h2>
+            <form id="booking-form" action={formAction} onSubmit={onSubmit} noValidate>
+              {heading("Twoje dane", "Podaj telefon lub e-mail. Wystarczy jedno, oddzwonimy z potwierdzeniem.")}
+
+              {/* Podsumowanie na telefonie (na desktopie jest w panelu obok) */}
+              <div className="mb-8 rounded-2xl border border-line bg-sand/40 p-4 lg:hidden">
+                <SummaryList rows={summaryRows} onEdit={goTo} />
+              </div>
 
               <input type="hidden" name="serviceId" value={serviceId ?? ""} />
               <input type="hidden" name="staffId" value={staffId} />
@@ -289,29 +472,29 @@ export function BookingWizard({
               <div className="hidden" aria-hidden="true">
                 <label>
                   Nie wypełniaj
-                  <input
-                    type="text"
-                    name="website"
-                    tabIndex={-1}
-                    autoComplete="off"
-                  />
+                  <input type="text" name="website" tabIndex={-1} autoComplete="off" />
                 </label>
               </div>
 
-              {state.message && (
+              {state.message && Object.keys(clientErrors).length === 0 && (
                 <p
                   role="alert"
-                  className="mt-4 rounded-xl border border-terracotta/40 bg-cream px-4 py-3 text-sm text-terracotta-deep"
+                  className="mb-6 rounded-xl border border-terracotta-deep/40 bg-cream px-4 py-3 text-sm text-terracotta-ink"
                 >
                   {state.message}
+                  {state.errors?.date && (
+                    <>
+                      {" "}
+                      <button type="button" onClick={() => goTo(3)} className="underline underline-offset-4">
+                        Zmień termin
+                      </button>
+                    </>
+                  )}
                 </p>
               )}
 
-              <div className="mt-6 space-y-5">
-                <div>
-                  <label htmlFor="name" className="block text-sm text-ink-soft">
-                    Imię i nazwisko <span className="text-terracotta">*</span>
-                  </label>
+              <div className="space-y-5">
+                <Field id="name" label="Imię i nazwisko" required error={errors.name}>
                   <input
                     id="name"
                     name="name"
@@ -319,20 +502,12 @@ export function BookingWizard({
                     autoComplete="name"
                     aria-invalid={Boolean(errors.name)}
                     aria-describedby={errors.name ? "err-name" : undefined}
-                    className={`mt-2 ${fieldClass(Boolean(errors.name))}`}
+                    className={fieldClass(Boolean(errors.name))}
                   />
-                  {errors.name && (
-                    <p id="err-name" className="mt-1.5 text-sm text-terracotta-deep">
-                      {errors.name}
-                    </p>
-                  )}
-                </div>
+                </Field>
 
                 <div className="grid gap-5 sm:grid-cols-2">
-                  <div>
-                    <label htmlFor="phone" className="block text-sm text-ink-soft">
-                      Telefon
-                    </label>
+                  <Field id="phone" label="Telefon" error={errors.phone}>
                     <input
                       id="phone"
                       name="phone"
@@ -341,18 +516,10 @@ export function BookingWizard({
                       autoComplete="tel"
                       aria-invalid={Boolean(errors.phone)}
                       aria-describedby={errors.phone ? "err-phone" : undefined}
-                      className={`mt-2 ${fieldClass(Boolean(errors.phone))}`}
+                      className={fieldClass(Boolean(errors.phone))}
                     />
-                    {errors.phone && (
-                      <p id="err-phone" className="mt-1.5 text-sm text-terracotta-deep">
-                        {errors.phone}
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="block text-sm text-ink-soft">
-                      E-mail
-                    </label>
+                  </Field>
+                  <Field id="email" label="E-mail" error={errors.email}>
                     <input
                       id="email"
                       name="email"
@@ -361,70 +528,55 @@ export function BookingWizard({
                       autoComplete="email"
                       aria-invalid={Boolean(errors.email)}
                       aria-describedby={errors.email ? "err-email" : undefined}
-                      className={`mt-2 ${fieldClass(Boolean(errors.email))}`}
+                      className={fieldClass(Boolean(errors.email))}
                     />
-                    {errors.email && (
-                      <p id="err-email" className="mt-1.5 text-sm text-terracotta-deep">
-                        {errors.email}
-                      </p>
-                    )}
-                  </div>
+                  </Field>
                 </div>
-                <p className="-mt-2 text-xs text-muted">
-                  Podaj telefon lub e-mail — wystarczy jedno, oddzwonimy z
-                  potwierdzeniem.
-                </p>
 
-                <div>
-                  <label htmlFor="notes" className="block text-sm text-ink-soft">
-                    Uwagi (opcjonalnie)
-                  </label>
+                <Field id="notes" label="Uwagi (opcjonalnie)" error={errors.notes}>
                   <textarea
                     id="notes"
                     name="notes"
                     rows={3}
+                    maxLength={500}
+                    placeholder="Np. długość włosów, poprzednia koloryzacja"
                     aria-invalid={Boolean(errors.notes)}
                     aria-describedby={errors.notes ? "err-notes" : undefined}
-                    className={`mt-2 ${fieldClass(Boolean(errors.notes))}`}
+                    className={fieldClass(Boolean(errors.notes))}
                   />
-                  {errors.notes && (
-                    <p id="err-notes" className="mt-1.5 text-sm text-terracotta-deep">
-                      {errors.notes}
-                    </p>
-                  )}
-                </div>
+                </Field>
 
                 <div>
-                  <label className="flex items-start gap-3 text-sm text-ink-soft">
+                  <label className="flex cursor-pointer items-start gap-3 text-sm text-ink-soft">
                     <input
                       type="checkbox"
                       name="consent"
-                      className="mt-1 h-4 w-4 shrink-0 accent-terracotta"
+                      className="mt-0.5 h-5 w-5 shrink-0 accent-terracotta-deep"
                       aria-invalid={Boolean(errors.consent)}
                       aria-describedby={errors.consent ? "err-consent" : undefined}
                     />
                     <span>
                       Zgadzam się na kontakt w celu potwierdzenia wizyty.{" "}
-                      <span className="text-terracotta">*</span>
+                      <span className="text-terracotta-ink">*</span>
                     </span>
                   </label>
                   {errors.consent && (
-                    <p id="err-consent" className="mt-1.5 text-sm text-terracotta-deep">
+                    <p id="err-consent" className="mt-1.5 text-sm text-terracotta-ink">
                       {errors.consent}
                     </p>
                   )}
                 </div>
               </div>
 
-              <p className="mt-6 text-xs text-muted">{salon.bookingPolicy}</p>
+              <p className="mt-6 text-sm text-muted">{salon.bookingPolicy}</p>
 
-              <div className="mt-6 flex flex-wrap items-center gap-4">
+              <div className="mt-8 flex flex-wrap items-center gap-4">
                 <button
                   type="button"
-                  onClick={back}
-                  className="text-sm text-muted transition-colors duration-300 ease-silk hover:text-ink"
+                  onClick={() => goTo(3)}
+                  className="press inline-flex min-h-11 items-center rounded-pill px-4 text-sm text-ink-soft transition-colors hover:text-ink"
                 >
-                  ← Wstecz
+                  Wstecz
                 </button>
                 <SubmitButton />
               </div>
@@ -432,76 +584,157 @@ export function BookingWizard({
           )}
         </div>
 
-        {/* Nawigacja kroków 1-3 */}
+        {/* Nawigacja kroków 1-3: na desktopie pod treścią */}
         {step < 4 && (
-          <div className="mt-8">
+          <div className="mt-10 hidden items-center gap-4 lg:flex">
+            {step > 1 && (
+              <button
+                type="button"
+                onClick={() => goTo(step - 1)}
+                className="press inline-flex min-h-11 items-center rounded-pill px-4 text-sm text-ink-soft transition-colors hover:text-ink"
+              >
+                Wstecz
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => goTo(step + 1)}
+              className="press inline-flex min-h-12 items-center justify-center rounded-pill bg-terracotta-deep px-9 text-sm font-medium text-cream transition-colors duration-300 hover:bg-[#84503f]"
+            >
+              Dalej: {STEPS[step]}
+            </button>
             {stepError && (
-              <p role="alert" className="mb-4 text-sm text-terracotta-deep">
+              <p role="alert" className="text-sm text-terracotta-ink">
                 {stepError}
               </p>
             )}
-            <div className="flex items-center gap-4">
-              {step > 1 && (
-                <button
-                  type="button"
-                  onClick={back}
-                  className="text-sm text-muted transition-colors duration-300 ease-silk hover:text-ink"
-                >
-                  ← Wstecz
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={next}
-                className="inline-flex items-center justify-center gap-2 rounded-pill bg-terracotta px-8 py-4 text-sm font-medium text-cream shadow-[0_8px_24px_-12px_rgba(156,95,75,0.6)] transition duration-300 ease-silk hover:bg-terracotta-deep hover:-translate-y-0.5"
-              >
-                Dalej
-              </button>
-            </div>
           </div>
         )}
       </div>
 
-      {/* Podsumowanie na żywo */}
-      <aside className="lg:pt-16">
-        <div className="sticky top-28 rounded-card border border-line bg-sand/30 p-6">
-          <h2 className="text-xs uppercase tracking-[0.16em] text-muted">
-            Twoja wizyta
-          </h2>
-          <dl className="mt-4 space-y-3 text-sm">
-            <div className="flex justify-between gap-4 border-b border-line pb-3">
-              <dt className="text-muted">Usługa</dt>
-              <dd className="text-right text-ink">{service?.name ?? "—"}</dd>
-            </div>
-            <div className="flex justify-between gap-4 border-b border-line pb-3">
-              <dt className="text-muted">Stylista</dt>
-              <dd className="text-right text-ink">
-                {staffId === "any"
-                  ? "Pierwszy wolny"
-                  : (eligibleStaff.find((p) => p.id === staffId)?.name ?? "—")}
-              </dd>
-            </div>
-            <div className="flex justify-between gap-4 border-b border-line pb-3">
-              <dt className="text-muted">Termin</dt>
-              <dd className="text-right text-ink">
-                {selectedDay && time
-                  ? `${selectedDay.weekday}, ${selectedDay.label}, ${time}`
-                  : "—"}
-              </dd>
-            </div>
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted">Cena</dt>
-              <dd className="text-right font-medium text-ink">
-                {service ? formatPrice(service) : "—"}
-              </dd>
-            </div>
-          </dl>
-          <p className="mt-5 text-xs text-muted">
-            <span className="text-terracotta">✦</span> 0% prowizji — rezerwujesz
-            bezpośrednio u nas.
+      {/* Podsumowanie na żywo (desktop) */}
+      <aside className="hidden lg:col-span-4 lg:block">
+        <div className="sticky top-28 rounded-card border border-line bg-sand/40 p-6">
+          <h2 className="font-display text-xl italic text-ink">Twoja wizyta</h2>
+          <div className="mt-4">
+            <SummaryList rows={summaryRows} onEdit={step > 1 ? goTo : undefined} current={step} />
+          </div>
+          <div className="mt-5 flex items-baseline justify-between border-t border-line pt-4">
+            <span className="text-sm text-muted">Cena</span>
+            <span className="font-display text-2xl tabular-nums text-ink">
+              {service ? formatPrice(service) : "-"}
+            </span>
+          </div>
+          {service && (
+            <p className="mt-1 text-right text-sm text-muted">
+              {formatDuration(service.durationMin)}
+            </p>
+          )}
+          <p className="mt-6 text-sm text-muted">
+            Rezerwujesz bezpośrednio u nas, bez prowizji pośredników.
           </p>
         </div>
       </aside>
+
+      {/* Dolny pasek akcji (telefon i tablet), kroki 1-3 */}
+      {step < 4 && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-cream/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md lg:hidden">
+          {stepError && (
+            <p role="alert" className="mb-2 text-sm text-terracotta-ink">
+              {stepError}
+            </p>
+          )}
+          <div className="flex items-center gap-3">
+            {step > 1 && (
+              <button
+                type="button"
+                onClick={() => goTo(step - 1)}
+                aria-label="Wstecz"
+                className="press flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line text-ink"
+              >
+                <svg aria-hidden width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M10 3 5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            )}
+            <div className="min-w-0 flex-1 text-sm leading-tight">
+              <p className="truncate text-ink">{service?.name ?? "Wybierz usługę"}</p>
+              <p className="truncate text-muted">
+                {service ? `${formatPrice(service)} · ${formatDuration(service.durationMin)}` : `Krok ${step} z 4`}
+                {termLabel && step === 3 ? ` · ${termLabel}` : ""}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => goTo(step + 1)}
+              className="press inline-flex min-h-12 shrink-0 items-center justify-center rounded-pill bg-terracotta-deep px-6 text-sm font-medium text-cream"
+            >
+              Dalej
+            </button>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+function Field({
+  id,
+  label,
+  required,
+  error,
+  children,
+}: {
+  id: string;
+  label: string;
+  required?: boolean;
+  error?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="mb-2 block text-sm text-ink-soft">
+        {label} {required && <span className="text-terracotta-ink">*</span>}
+      </label>
+      {children}
+      {error && (
+        <p id={`err-${id}`} className="mt-1.5 text-sm text-terracotta-ink">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function SummaryList({
+  rows,
+  onEdit,
+  current,
+}: {
+  rows: { label: string; value: ReactNode; step: number }[];
+  onEdit?: (step: number) => void;
+  current?: number;
+}) {
+  return (
+    <dl className="space-y-3 text-sm">
+      {rows.map((r) => (
+        <div key={r.label} className="flex items-baseline justify-between gap-4">
+          <dt className="text-muted">{r.label}</dt>
+          <dd className="flex min-w-0 items-baseline gap-3 text-right text-ink">
+            <span className="min-w-0">{r.value ?? "-"}</span>
+            {onEdit && r.value && r.step !== current && (
+              <button
+                type="button"
+                onClick={() => onEdit(r.step)}
+                className="-my-3 inline-flex min-h-11 shrink-0 items-center px-1 text-xs text-ink-soft underline decoration-champagne underline-offset-4 hover:text-terracotta-ink"
+                aria-label={`Zmień: ${r.label.toLowerCase()}`}
+              >
+                zmień
+              </button>
+            )}
+          </dd>
+        </div>
+      ))}
+    </dl>
   );
 }

@@ -4,6 +4,8 @@ export interface DayOption {
   iso: string; // yyyy-mm-dd
   label: string; // np. „9 cze”
   weekday: string; // np. „pon”
+  day: number; // numer dnia miesiąca
+  month: string; // np. „paź”
 }
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -17,11 +19,14 @@ function hoursForDate(date: Date, hours: OpeningHour[]): OpeningHour {
   return hours[idx];
 }
 
-/** Deterministyczna „dostępność” slotu (bez Math.random → brak hydration mismatch). */
+/** Deterministyczna „dostępność” slotu (bez Math.random, więc bez hydration mismatch). */
 function isAvailable(seed: string): boolean {
-  let sum = 0;
-  for (let i = 0; i < seed.length; i++) sum += seed.charCodeAt(i);
-  return sum % 10 >= 3; // ~70% wolnych
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0) % 10 >= 3; // ok. 70% wolnych
 }
 
 /** Najbliższe `count` dni otwarcia (od jutra). */
@@ -41,6 +46,8 @@ export function getAvailableDays(
         iso: toISO(d),
         label: d.toLocaleDateString("pl-PL", { day: "numeric", month: "short" }),
         weekday: d.toLocaleDateString("pl-PL", { weekday: "short" }),
+        day: d.getDate(),
+        month: d.toLocaleDateString("pl-PL", { month: "short" }),
       });
     }
     d.setDate(d.getDate() + 1);
@@ -49,8 +56,17 @@ export function getAvailableDays(
   return out;
 }
 
-/** Sloty co 90 minut w godzinach otwarcia danego dnia. */
-export function getSlotsForDay(iso: string, hours: OpeningHour[]): TimeSlot[] {
+/**
+ * Sloty co 30 minut w godzinach otwarcia danego dnia. Pokazujemy tylko
+ * godziny, po których wizyta o danym czasie trwania skończy się przed
+ * zamknięciem. Dostępność zależy też od stylisty (inny grafik).
+ */
+export function getSlotsForDay(
+  iso: string,
+  hours: OpeningHour[],
+  durationMin = 60,
+  staffId = "any",
+): TimeSlot[] {
   const date = new Date(`${iso}T00:00:00`);
   const h = hoursForDate(date, hours);
   if (!h.open || !h.close) return [];
@@ -59,9 +75,9 @@ export function getSlotsForDay(iso: string, hours: OpeningHour[]): TimeSlot[] {
   const open = oh * 60 + om;
   const close = ch * 60 + cm;
   const slots: TimeSlot[] = [];
-  for (let t = open; t + 60 <= close; t += 90) {
+  for (let t = open; t + durationMin <= close; t += 30) {
     const time = `${pad(Math.floor(t / 60))}:${pad(t % 60)}`;
-    slots.push({ date: iso, time, available: isAvailable(iso + time) });
+    slots.push({ date: iso, time, available: isAvailable(`${iso}|${time}|${staffId}`) });
   }
   return slots;
 }
