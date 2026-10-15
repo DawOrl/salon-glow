@@ -1,9 +1,5 @@
-"use client";
-
-import { useFormStatus } from "react-dom";
-
-export function SubmitButton() {
-  const { pending } = useFormStatus();
+/** Przycisk wysyłki; stan `pending` pochodzi z useActionState kreatora. */
+export function SubmitButton({ pending }: { pending: boolean }) {
   return (
     <button
       type="submit"

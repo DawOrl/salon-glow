@@ -3,6 +3,7 @@ import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { BookingWizard } from "@/components/booking/BookingWizard";
 import { salonRating } from "@/data/reviews";
+import { todayInWarsaw } from "@/lib/slots";
 
 export const metadata: Metadata = {
   title: "Rezerwacja wizyty",
@@ -41,7 +42,7 @@ export default async function ReservationPage({
         </div>
 
         <div className="mt-12 border-t border-line pt-10">
-          <BookingWizard initialServiceSlug={usluga} />
+          <BookingWizard initialServiceSlug={usluga} today={todayInWarsaw()} />
         </div>
       </Container>
     </div>

@@ -9,15 +9,36 @@ export interface DayOption {
 }
 
 const pad = (n: number) => String(n).padStart(2, "0");
-const toISO = (d: Date) =>
-  `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
-/** salon.openingHours jest w kolejności Pon..Nd; JS getDay() to 0=Nd..6=Sob. */
+/**
+ * Daty kalendarzowe trzymamy jako południe UTC danego dnia
+ * i czytamy getterami UTC. Dzięki temu serwer (UTC) i przeglądarka (dowolna strefa)
+ * liczą te same dni, bez hydration mismatch.
+ */
+const toISO = (d: Date) =>
+  `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
+const fromISO = (iso: string) => new Date(`${iso}T12:00:00Z`);
+
+/** Dzisiejsza data kalendarzowa w strefie salonu (Europe/Warsaw). */
+export function todayInWarsaw(now: Date = new Date()): string {
+  // en-CA formatuje jako rrrr-mm-dd
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Warsaw",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+}
+
+/** salon.openingHours jest w kolejności Pon..Nd; getUTCDay() to 0=Nd..6=Sob. */
 function hoursForDate(date: Date, hours: OpeningHour[]): OpeningHour {
-  const js = date.getDay();
+  const js = date.getUTCDay();
   const idx = js === 0 ? 6 : js - 1;
   return hours[idx];
 }
+
+const fmt = (d: Date, opts: Intl.DateTimeFormatOptions) =>
+  d.toLocaleDateString("pl-PL", { ...opts, timeZone: "UTC" });
 
 /** Deterministyczna „dostępność” slotu (bez Math.random, więc bez hydration mismatch). */
 function isAvailable(seed: string): boolean {
@@ -29,28 +50,27 @@ function isAvailable(seed: string): boolean {
   return (h >>> 0) % 10 >= 3; // ok. 70% wolnych
 }
 
-/** Najbliższe `count` dni otwarcia (od jutra). */
+/** Najbliższe `count` dni otwarcia (od jutra), licząc „dziś” w Warszawie. */
 export function getAvailableDays(
-  from: Date,
+  todayISO: string,
   count: number,
   hours: OpeningHour[],
 ): DayOption[] {
   const out: DayOption[] = [];
-  const d = new Date(from);
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() + 1);
+  const d = fromISO(todayISO);
+  d.setUTCDate(d.getUTCDate() + 1);
   let scanned = 0;
   while (out.length < count && scanned < 40) {
     if (hoursForDate(d, hours).open) {
       out.push({
         iso: toISO(d),
-        label: d.toLocaleDateString("pl-PL", { day: "numeric", month: "short" }),
-        weekday: d.toLocaleDateString("pl-PL", { weekday: "short" }),
-        day: d.getDate(),
-        month: d.toLocaleDateString("pl-PL", { month: "short" }),
+        label: fmt(d, { day: "numeric", month: "short" }),
+        weekday: fmt(d, { weekday: "short" }),
+        day: d.getUTCDate(),
+        month: fmt(d, { month: "short" }),
       });
     }
-    d.setDate(d.getDate() + 1);
+    d.setUTCDate(d.getUTCDate() + 1);
     scanned++;
   }
   return out;
@@ -67,8 +87,7 @@ export function getSlotsForDay(
   durationMin = 60,
   staffId = "any",
 ): TimeSlot[] {
-  const date = new Date(`${iso}T00:00:00`);
-  const h = hoursForDate(date, hours);
+  const h = hoursForDate(fromISO(iso), hours);
   if (!h.open || !h.close) return [];
   const [oh, om] = h.open.split(":").map(Number);
   const [ch, cm] = h.close.split(":").map(Number);

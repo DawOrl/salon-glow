@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  startTransition,
   useActionState,
   useEffect,
   useRef,
@@ -96,10 +97,16 @@ function validateClient(fd: FormData) {
   return e;
 }
 
+type Contact = { name: string; phone: string; email: string; notes: string; consent: boolean };
+const emptyContact: Contact = { name: "", phone: "", email: "", notes: "", consent: false };
+
 export function BookingWizard({
   initialServiceSlug,
+  today,
 }: {
   initialServiceSlug?: string;
+  /** Dzisiejsza data (rrrr-mm-dd, Europe/Warsaw) policzona na serwerze. */
+  today: string;
 }) {
   const initialService = initialServiceSlug
     ? services.find((s) => s.slug === initialServiceSlug)
@@ -111,15 +118,28 @@ export function BookingWizard({
   );
   const [staffId, setStaffId] = useState<string>("any");
 
-  // Leniwa inicjalizacja: /rezerwacja jest dynamiczna (SSR na żądanie),
-  // więc dzień po stronie serwera i klienta jest ten sam (brak hydration mismatch).
+  // "Dziś" przychodzi z serwera (strefa Europe/Warsaw), więc serwer i przeglądarka
+  // liczą te same dni niezależnie od strefy czasowej (brak hydration mismatch).
   const [days] = useState<DayOption[]>(() =>
-    getAvailableDays(new Date(), 12, salon.openingHours),
+    getAvailableDays(today, 12, salon.openingHours),
   );
   const [date, setDate] = useState<string | null>(days[0]?.iso ?? null);
   const [time, setTime] = useState<string | null>(null);
   const [stepError, setStepError] = useState<string | null>(null);
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
+  // Dane kontaktowe żyją w stanie kreatora: przetrwają "Wstecz", "zmień"
+  // i odpowiedź serwera z błędem (formularz nie jest resetowany przez akcję).
+  const [contact, setContact] = useState<Contact>(emptyContact);
+  function setField<K extends keyof Contact>(key: K, value: Contact[K]) {
+    setContact((c) => ({ ...c, [key]: value }));
+    if (clientErrors[key]) {
+      setClientErrors((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    }
+  }
 
   const service = serviceId ? getServiceById(serviceId) : undefined;
   const eligibleStaff = service ? getStaffForService(service) : [];
@@ -131,7 +151,7 @@ export function BookingWizard({
     : [];
   const freeCount = slots.filter((s) => s.available).length;
 
-  const [state, formAction] = useActionState<BookingState, FormData>(
+  const [state, formAction, pending] = useActionState<BookingState, FormData>(
     createReservation,
     { ok: false },
   );
@@ -176,14 +196,19 @@ export function BookingWizard({
     setStep(Math.max(1, Math.min(4, target)));
   }
 
+  // Wysyłka bez `action` na <form>: React 19 resetuje formularz po akcji
+  // przekazanej w `action`, a tu chcemy zachować wpisane dane przy błędzie.
   function onSubmit(e: FormEvent<HTMLFormElement>) {
-    const found = validateClient(new FormData(e.currentTarget));
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const found = validateClient(fd);
     setClientErrors(found);
     if (Object.keys(found).length) {
-      e.preventDefault();
       const first = Object.keys(found)[0];
       e.currentTarget.querySelector<HTMLElement>(`[name="${first}"]`)?.focus();
+      return;
     }
+    startTransition(() => formAction(fd));
   }
 
   const selectedDay = days.find((d) => d.iso === date);
@@ -456,7 +481,7 @@ export function BookingWizard({
 
           {/* KROK 4: dane i wysyłka */}
           {step === 4 && (
-            <form id="booking-form" action={formAction} onSubmit={onSubmit} noValidate>
+            <form id="booking-form" onSubmit={onSubmit} noValidate>
               {heading("Twoje dane", "Podaj telefon lub e-mail. Wystarczy jedno, oddzwonimy z potwierdzeniem.")}
 
               {/* Podsumowanie na telefonie (na desktopie jest w panelu obok) */}
@@ -498,6 +523,8 @@ export function BookingWizard({
                   <input
                     id="name"
                     name="name"
+                    value={contact.name}
+                    onChange={(e) => setField("name", e.target.value)}
                     required
                     autoComplete="name"
                     aria-invalid={Boolean(errors.name)}
@@ -511,6 +538,8 @@ export function BookingWizard({
                     <input
                       id="phone"
                       name="phone"
+                      value={contact.phone}
+                      onChange={(e) => setField("phone", e.target.value)}
                       type="tel"
                       inputMode="tel"
                       autoComplete="tel"
@@ -523,6 +552,8 @@ export function BookingWizard({
                     <input
                       id="email"
                       name="email"
+                      value={contact.email}
+                      onChange={(e) => setField("email", e.target.value)}
                       type="email"
                       inputMode="email"
                       autoComplete="email"
@@ -537,6 +568,8 @@ export function BookingWizard({
                   <textarea
                     id="notes"
                     name="notes"
+                    value={contact.notes}
+                    onChange={(e) => setField("notes", e.target.value)}
                     rows={3}
                     maxLength={500}
                     placeholder="Np. długość włosów, poprzednia koloryzacja"
@@ -551,6 +584,8 @@ export function BookingWizard({
                     <input
                       type="checkbox"
                       name="consent"
+                      checked={contact.consent}
+                      onChange={(e) => setField("consent", e.target.checked)}
                       className="mt-0.5 h-5 w-5 shrink-0 accent-terracotta-deep"
                       aria-invalid={Boolean(errors.consent)}
                       aria-describedby={errors.consent ? "err-consent" : undefined}
@@ -578,7 +613,7 @@ export function BookingWizard({
                 >
                   Wstecz
                 </button>
-                <SubmitButton />
+                <SubmitButton pending={pending} />
               </div>
             </form>
           )}

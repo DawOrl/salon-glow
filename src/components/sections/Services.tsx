@@ -18,8 +18,6 @@ import { formatDuration, formatPrice, pluralUslugi } from "@/lib/format";
 export function Services() {
   const [active, setActive] = useState(0);
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
-  const cat = serviceCategories[active];
-  const items = getServicesByCategory(cat.id);
 
   function onKeyDown(e: KeyboardEvent<HTMLButtonElement>) {
     const n = serviceCategories.length;
@@ -111,50 +109,57 @@ export function Services() {
           </div>
         </Reveal>
 
-        <div
-          id={`panel-${cat.slug}`}
-          role="tabpanel"
-          aria-labelledby={`tab-${cat.slug}`}
-          className="min-w-0 lg:col-span-8"
-        >
-          <p className="max-w-xl text-ink-soft">{cat.description}</p>
-          <ul className="mt-6 border-t border-line">
-            {items.map((s) => (
-              <li key={s.id} className="border-b border-line">
-                <div className="flex items-baseline gap-3 pt-5">
-                  <Link
-                    href={`/uslugi/${s.slug}`}
-                    className="min-w-0 font-medium text-ink underline-offset-4 transition-colors hover:text-terracotta-ink hover:underline"
-                    style={{ viewTransitionName: `svc-${s.slug}` }}
-                  >
-                    {s.name}
-                  </Link>
-                  <span aria-hidden className="leader hidden sm:block" />
-                  <span className="ml-auto shrink-0 whitespace-nowrap font-display text-lg tabular-nums text-ink sm:ml-0">
-                    {formatPrice(s)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between gap-4 pt-1 pb-4 text-sm">
-                  <span className="text-muted">
-                    {formatDuration(s.durationMin)}
-                    {s.popular && (
-                      <span className="font-display text-terracotta-ink italic">
-                        {" "}
-                        · często wybierane
+        {/* Wszystkie panele są w DOM (aria-controls każdej zakładki wskazuje
+            istniejący element), widoczny jest tylko aktywny. */}
+        <div className="min-w-0 lg:col-span-8">
+          {serviceCategories.map((cat, i) => (
+            <div
+              key={cat.id}
+              id={`panel-${cat.slug}`}
+              role="tabpanel"
+              aria-labelledby={`tab-${cat.slug}`}
+              hidden={i !== active}
+            >
+              <p className="max-w-xl text-ink-soft">{cat.description}</p>
+              <ul className="mt-6 border-t border-line">
+                {getServicesByCategory(cat.id).map((s) => (
+                  <li key={s.id} className="border-b border-line">
+                    <div className="flex items-baseline gap-3 pt-5">
+                      <Link
+                        href={`/uslugi/${s.slug}`}
+                        className="min-w-0 font-medium text-ink underline-offset-4 transition-colors hover:text-terracotta-ink hover:underline"
+                        style={{ viewTransitionName: `svc-${s.slug}` }}
+                      >
+                        {s.name}
+                      </Link>
+                      <span aria-hidden className="leader hidden sm:block" />
+                      <span className="ml-auto shrink-0 whitespace-nowrap font-display text-lg tabular-nums text-ink sm:ml-0">
+                        {formatPrice(s)}
                       </span>
-                    )}
-                  </span>
-                  <Link
-                    href={`/rezerwacja?usluga=${s.slug}`}
-                    className="-my-2 inline-flex min-h-11 shrink-0 items-center text-ink-soft underline decoration-champagne underline-offset-4 transition-colors hover:text-terracotta-ink"
-                    aria-label={`Umów: ${s.name}`}
-                  >
-                    Umów
-                  </Link>
-                </div>
-              </li>
-            ))}
-          </ul>
+                    </div>
+                    <div className="flex items-center justify-between gap-4 pt-1 pb-4 text-sm">
+                      <span className="text-muted">
+                        {formatDuration(s.durationMin)}
+                        {s.popular && (
+                          <span className="font-display text-terracotta-ink italic">
+                            {" "}
+                            · często wybierane
+                          </span>
+                        )}
+                      </span>
+                      <Link
+                        href={`/rezerwacja?usluga=${s.slug}`}
+                        className="-my-2 inline-flex min-h-11 shrink-0 items-center text-ink-soft underline decoration-champagne underline-offset-4 transition-colors hover:text-terracotta-ink"
+                        aria-label={`Umów: ${s.name}`}
+                      >
+                        Umów
+                      </Link>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
           <Link
             href="/uslugi"
             className="mt-8 inline-flex min-h-11 items-center gap-2 text-sm text-ink underline decoration-champagne underline-offset-4 transition-colors hover:text-terracotta-ink"

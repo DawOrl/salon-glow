@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/Button";
 
 // Pełne ścieżki "/#...", żeby linki działały także z podstron.
@@ -25,18 +25,38 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Blokada scrolla i Esc przy otwartym menu mobilnym.
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Otwarte menu mobilne: blokada scrolla, tło (treść i stopka) jako inert,
+  // fokus na pierwszy link, Esc zamyka i oddaje fokus przyciskowi menu.
+  // Poszerzenie okna do lg zamyka menu (cleanup zdejmuje blokady).
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    const background = [
+      document.getElementById("main"),
+      document.querySelector("body > footer"),
+    ].filter((el): el is HTMLElement => Boolean(el));
+    background.forEach((el) => el.setAttribute("inert", ""));
+    menuRef.current?.querySelector<HTMLElement>("a")?.focus({ preventScroll: true });
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        toggleRef.current?.focus();
+      }
     };
+    const wide = window.matchMedia("(min-width: 1024px)");
+    const onWide = () => wide.matches && setOpen(false);
     window.addEventListener("keydown", onKey);
+    wide.addEventListener("change", onWide);
     return () => {
       document.body.style.overflow = prev;
+      background.forEach((el) => el.removeAttribute("inert"));
       window.removeEventListener("keydown", onKey);
+      wide.removeEventListener("change", onWide);
     };
   }, [open]);
 
@@ -82,6 +102,7 @@ export function Navbar() {
 
         {/* Hamburger (mobile) */}
         <button
+          ref={toggleRef}
           type="button"
           className="flex h-11 w-11 items-center justify-center rounded-full lg:hidden"
           aria-expanded={open}
@@ -120,6 +141,7 @@ export function Navbar() {
 
       {/* Panel mobilny (inert, gdy zamknięty: linki poza kolejnością Tab) */}
       <div
+        ref={menuRef}
         id="mobile-menu"
         inert={!open}
         className={`overflow-hidden border-t border-line/60 bg-cream lg:hidden ${
